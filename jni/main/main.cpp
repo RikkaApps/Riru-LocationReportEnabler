@@ -70,8 +70,6 @@ __attribute__((visibility("default"))) void nativeForkAndSpecializePre(JNIEnv *e
     if (list.size() == 0) {
         list.push_back("com.google.android.gms");
         list.push_back("com.google.android.gsf");
-        list.push_back("com.google.android.apps.maps");
-        list.push_back("com.google.android.apps.fitness");
     }
     uid = _uid;
     enable_hook = is_app_need_hook(env, appDataDir);
