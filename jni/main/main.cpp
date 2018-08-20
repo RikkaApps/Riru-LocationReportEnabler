@@ -39,9 +39,9 @@ int is_app_need_hook(JNIEnv *env, jstring appDataDir) {
 
     env->ReleaseStringUTFChars(appDataDir, app_data_dir);
 
-    for (auto& s : list) {
+    for (auto &s : list) {
         if (strcmp(s.c_str(), package_name) == 0)
-            return 1; 
+            return 1;
     }
 
     return 0;
@@ -76,7 +76,7 @@ __attribute__((visibility("default"))) void nativeForkAndSpecializePre(JNIEnv *e
 }
 
 __attribute__((visibility("default"))) int nativeForkAndSpecializePost(JNIEnv *env, jclass clazz,
-                                                                        jint res) {
+                                                                       jint res) {
     nativeForkAndSpecialize(res, enable_hook, package_name, uid);
     return !enable_hook;
 }
