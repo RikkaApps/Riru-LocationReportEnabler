@@ -8,6 +8,7 @@ Hook `__system_property_get` in these packages
 
 * com.google.android.gsf
 * com.google.android.gms
+* com.google.android.apps.maps
 
 and change the return value
 
