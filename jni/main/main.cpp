@@ -11,7 +11,6 @@
 #include <utility>
 #include <string>
 
-#include "misc.h"
 #include "logging.h"
 #include "hook.h"
 

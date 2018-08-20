@@ -10,6 +10,6 @@ LOCAL_STATIC_LIBRARIES := xhook
 LOCAL_LDLIBS += -ldl -llog
 LOCAL_LDFLAGS := -Wl
 
-LOCAL_SRC_FILES:= main.cpp misc.cpp wrap.cpp hook.cpp
+LOCAL_SRC_FILES:= main.cpp hook.cpp
 
 include $(BUILD_SHARED_LIBRARY)
