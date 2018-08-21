@@ -7,6 +7,9 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <dlfcn.h>
+#include <cstdlib>
+#include <string>
+#include <sys/system_properties.h>
 #include <xhook/xhook.h>
 
 #include "logging.h"
@@ -33,10 +36,26 @@ NEW_FUNC_DEF(int, __system_property_get, const char *key, char *value) {
     return res;
 }
 
-void install_hook(const char* package_name, int user) {
+NEW_FUNC_DEF(std::string, _ZN7android4base11GetPropertyERKNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES9_, const std::string &key, const std::string &default_value) {
+    std::string res = old__ZN7android4base11GetPropertyERKNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES9_(key, default_value);
+    if (strcmp("gsm.sim.operator.numeric", key.c_str()) == 0) {
+        res = "310030";
+        LOGI("android::base::GetProperty: %s -> %s", key.c_str(), res.c_str());
+    } else if (strcmp("gsm.sim.operator.iso-country", key.c_str()) == 0) {
+        res = "us";
+        LOGI("android::base::GetProperty: %s -> %s", key.c_str(), res.c_str());
+    }
+    return res;
+}
+
+void install_hook(const char *package_name, int user) {
     LOGI("install hook for %s (%d)", package_name, user);
 
     XHOOK_REGISTER(__system_property_get);
+
+    char sdk[PROP_VALUE_MAX + 1];
+    if (__system_property_get("ro.build.version.sdk", sdk) > 0 && atoi(sdk) >= 28)
+        XHOOK_REGISTER(_ZN7android4base11GetPropertyERKNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES9_);
 
     if (xhook_refresh(0) == 0)
         xhook_clear();
