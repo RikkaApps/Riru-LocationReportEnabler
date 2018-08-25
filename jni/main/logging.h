@@ -5,7 +5,7 @@
 #include "android/log.h"
 
 #ifndef LOG_TAG
-#define LOG_TAG    "LocationReportEnabler"
+#define LOG_TAG    "MiPushFakeForRiru"
 #endif
 
 #ifdef DEBUG
