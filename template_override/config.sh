@@ -41,7 +41,7 @@ LATESTARTSERVICE=false
 
 print_modname() {
   ui_print "********************************"
-  ui_print "Riru - Location Report Enabler  "
+  ui_print "Riru - MiPush Fake  "
   ui_print "********************************"
 }
 

@@ -1,34 +1,17 @@
-# Riru-LocationReportEnabler
+# Riru-MiPushFakeModule
 
-A module of [Riru](https://github.com/RikkaApps/Riru). Enable Google's location report by hook `__system_property_get` in some packages.
+A module of [Riru](https://github.com/RikkaApps/Riru). Fake as a Xiaomi Device by hook system_property_get.
 
 ## What does this module do
 
-By default, `__system_property_get` (`android::base::GetProperty` on Pie+) will be hooked in these packages
+By default, `__system_property_get` (`android::base::GetProperty` on Pie+) will be hooked in all packages
 
-* com.google.android.gsf
-* com.google.android.gms
-* com.google.android.apps.maps
+* `ro.miui.ui.version.name` -> `V9`
+* `ro.miui.ui.version.code` -> `7`
+* `ro.miui.version.code_time` -> `1527550858`
+* `ro.miui.internal.storage` -> `/sdcard/`
+* `ro.product.manufacturer` -> `Xiaomi`
+* `ro.product.brand` -> `Xiaomi`
+* `ro.product.name` -> `Xiaomi`
 
-and the return value will be changed
-
-* `gsm.sim.operator.numeric` -> `310030`
-* `gsm.sim.operator.iso-country` -> `us`
-
-## Customize
-
-* Add / remove enabled package
-
-  ```
-  touch /data/misc/riru/location_report_enabler/packages/<package name>
-  rm /data/misc/riru/location_report_enabler/packages/<package name>
-  ```
-
-  If `/data/misc/riru/location_report_enabler/packages` not exists, default package list will be used.
-
-* Return value
-
-  ```
-  echo 310030 > /data/misc/riru/location_report_enabler/gsm.sim.operator.numeric
-  echo us > /data/misc/riru/location_report_enabler/gsm.sim.operator.iso-country
-  ```
+ 

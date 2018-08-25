@@ -16,12 +16,9 @@
 #include "hook.h"
 #include "misc.h"
 
-#define CONFIG_PATH "/data/misc/riru/location_report_enabler"
-
 static char package_name[256];
 static int uid;
 static int enable_hook = true;
-
 
 void nativeForkAndSpecialize(int res, int enable_hook, const char *package_name, jint uid) {
     if (res == 0 && enable_hook) {
