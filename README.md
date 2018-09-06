@@ -20,8 +20,8 @@ and the return value will be changed
 * Add / remove enabled package
 
   ```
-  touch /data/misc/riru/location_report_enabler/packages/<package name>
-  rm /data/misc/riru/location_report_enabler/packages/<package name>
+  touch /data/misc/riru/modules/location_report_enabler/packages/<package name>
+  rm /data/misc/riru/modules/location_report_enabler/packages/<package name>
   ```
 
   If `/data/misc/riru/location_report_enabler/packages` not exists, default package list will be used.
@@ -29,6 +29,6 @@ and the return value will be changed
 * Return value
 
   ```
-  echo 310030 > /data/misc/riru/location_report_enabler/gsm.sim.operator.numeric
-  echo us > /data/misc/riru/location_report_enabler/gsm.sim.operator.iso-country
+  echo 310030 > /data/misc/riru/modules/location_report_enabler/gsm.sim.operator.numeric
+  echo us > /data/misc/riru/modules/location_report_enabler/gsm.sim.operator.iso-country
   ```
