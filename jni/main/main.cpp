@@ -36,7 +36,7 @@ int is_app_need_hook(JNIEnv *env, jstring appDataDir) {
 
     int user = 0;
     if (sscanf(app_data_dir, "/data/%*[^/]/%d/%s", &user, package_name) != 2) {
-        if (sscanf(app_data_dir, "/data/%*s/%s", package_name) != 1) {
+        if (sscanf(app_data_dir, "/data/%*[^/]/%s", package_name) != 1) {
             package_name[0] = '\0';
             LOGW("can't parse %s", app_data_dir);
             return 0;
