@@ -14,6 +14,8 @@ and the return value will be changed
 
 * `gsm.sim.operator.numeric` -> `310030`
 * `gsm.sim.operator.iso-country` -> `us`
+* `gsm.operator.numeric` -> `310030`
+* `gsm.operator.iso-country` -> `us`
 
 ## Customize
 
