@@ -39,13 +39,7 @@ NEW_FUNC_DEF(int, __system_property_get, const char *key, char *value) {
         if (strcmp("gsm.sim.operator.numeric", key) == 0) {
             strcpy(value, sim_operator_numeric);
             LOGI("system_property_get: %s -> %s", key, value);
-        } else if (strcmp("gsm.operator.numeric", key) == 0) {
-            strcpy(value, sim_operator_numeric);
-            LOGI("system_property_get: %s -> %s", key, value);
         } else if (strcmp("gsm.sim.operator.iso-country", key) == 0) {
-            strcpy(value, sim_operator_country);
-            LOGI("system_property_get: %s -> %s", key, value);
-        } else if (strcmp("gsm.operator.iso-country", key) == 0) {
             strcpy(value, sim_operator_country);
             LOGI("system_property_get: %s -> %s", key, value);
         }
@@ -58,13 +52,7 @@ NEW_FUNC_DEF(std::string, _ZN7android4base11GetPropertyERKNSt3__112basic_stringI
     if (strcmp("gsm.sim.operator.numeric", key.c_str()) == 0) {
         res = sim_operator_numeric;
         LOGI("android::base::GetProperty: %s -> %s", key.c_str(), res.c_str());
-    } else if (strcmp("gsm.operator.numeric", key.c_str()) == 0) {
-        res = sim_operator_numeric;
-        LOGI("android::base::GetProperty: %s -> %s", key.c_str(), res.c_str());
     } else if (strcmp("gsm.sim.operator.iso-country", key.c_str()) == 0) {
-        res = sim_operator_country;
-        LOGI("android::base::GetProperty: %s -> %s", key.c_str(), res.c_str());
-    } else if (strcmp("gsm.operator.iso-country", key.c_str()) == 0) {
         res = sim_operator_country;
         LOGI("android::base::GetProperty: %s -> %s", key.c_str(), res.c_str());
     }
