@@ -16,7 +16,7 @@
 #include "hook.h"
 #include "misc.h"
 
-#define CONFIG_PATH "/data/misc/riru/location_report_enabler"
+#define CONFIG_PATH "/data/misc/riru/modules/location_report_enabler"
 
 static char package_name[256];
 static int uid;
