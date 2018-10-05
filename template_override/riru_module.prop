@@ -1,5 +1,5 @@
-name=Module template
-version=v3
-versionCode=3
+name=Riru - MiPushFakeModule
+version=v5
+versionCode=5
 author=Timothy
-description=Module template
+description=Fake as XiaoMI device by hook system_property_get. Require Riru - Core installed.

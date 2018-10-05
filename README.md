@@ -4,7 +4,8 @@ A module of [Riru](https://github.com/RikkaApps/Riru). Fake as a Xiaomi Device b
 
 ## What does this module do
 
-By default, `__system_property_get` (`android::base::GetProperty` on Pie+) will be hooked in all packages
+By default, `__system_property_get` (`android::base::GetProperty` on Pie+) will be hooked in packages selected in
+MiPushFramework with value map below
 
 * `ro.miui.ui.version.name` -> `V9`
 * `ro.miui.ui.version.code` -> `7`
