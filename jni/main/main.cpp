@@ -50,7 +50,7 @@ int is_app_need_hook(JNIEnv *env, jstring appDataDir) {
         }
     } else {
         char path[PATH_MAX];
-        snprintf(path, PATH_MAX, CONFIG_PATH "/packages/%s", package_name);
+        snprintf(path, PATH_MAX, CONFIG_PATH "/packages/%d.%s", user, package_name);
         return access(path, F_OK) == 0;
     }
     return 0;
