@@ -1,5 +1,5 @@
 name=Location Report Enabler
-version=v5
-versionCode=5
+version=v6
+versionCode=6
 author=Rikka
 description=Enable location report by hook system_property_get. Require Riru - Core installed.

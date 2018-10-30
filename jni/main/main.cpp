@@ -11,6 +11,7 @@
 #include <utility>
 #include <string>
 #include <sys/system_properties.h>
+#include <riru.h>
 
 #include "logging.h"
 #include "hook.h"
