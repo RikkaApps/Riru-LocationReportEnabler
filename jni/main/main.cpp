@@ -15,9 +15,12 @@
 #include "logging.h"
 #include "hook.h"
 #include "misc.h"
+#include <riru.h>
 
 
 #define CONFIG_PATH "/data/misc/riru/modules/mipush_fake"
+
+#define FAKE_CONFIGURATION_GLOBAL "/data/misc/riru/modules/mipush_fake/packages/ALL"
 
 
 static char package_name[256];
@@ -42,6 +45,10 @@ int is_app_need_hook(JNIEnv *env, jstring appDataDir) {
     }
 
     env->ReleaseStringUTFChars(appDataDir, app_data_dir);
+
+    if (access(FAKE_CONFIGURATION_GLOBAL, F_OK) == 0) {
+        return 1;
+    }
 
     if (access(CONFIG_PATH "/packages", R_OK) != 0) {
         for (auto &s : packages) {
