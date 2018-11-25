@@ -97,6 +97,25 @@ __attribute__((visibility("default"))) void nativeForkAndSpecializePre(JNIEnv *e
 
 __attribute__((visibility("default"))) int nativeForkAndSpecializePost(JNIEnv *env, jclass clazz,
                                                                        jint res) {
+
+    if (res == 0 && enable_hook) {
+        if (env) {
+            LOGI("inject android.os.Build for %s ", package_name);
+
+            jclass build_class = env->FindClass("android.os.Build");
+            jfieldID brand_id = env->GetStaticFieldID(build_class, "BRAND", "Ljava/lang/String;");
+            jfieldID manufacturer_id = env->GetStaticFieldID(build_class, "MANUFACTURER", "Ljava/lang/String;");
+            jfieldID product_id = env->GetStaticFieldID(build_class, "PRODUCT", "Ljava/lang/String;");
+
+            jstring new_str = env->NewStringUTF("Xiaomi");
+            env->SetStaticObjectField(build_class, brand_id, new_str);
+            env->SetStaticObjectField(build_class, product_id, new_str);
+            env->SetStaticObjectField(build_class, manufacturer_id, new_str);
+
+            env->DeleteLocalRef(new_str);
+        }
+    }
+
     nativeForkAndSpecialize(res, enable_hook, package_name, uid);
     return !enable_hook;
 }
