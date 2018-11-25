@@ -33,6 +33,10 @@ int is_app_need_hook(JNIEnv *env, jstring appDataDir) {
         return 0;
 
 
+    if (access(FAKE_CONFIGURATION_GLOBAL, F_OK) == 0) {
+        return 1;
+    }
+
     const char *app_data_dir = env->GetStringUTFChars(appDataDir, NULL);
 
     int user = 0;
@@ -46,14 +50,11 @@ int is_app_need_hook(JNIEnv *env, jstring appDataDir) {
 
     env->ReleaseStringUTFChars(appDataDir, app_data_dir);
 
-    if (access(FAKE_CONFIGURATION_GLOBAL, F_OK) == 0) {
-        return 1;
-    }
-
     if (access(CONFIG_PATH "/packages", R_OK) != 0) {
         for (auto &s : packages) {
-            if (strcmp(s.c_str(), package_name) == 0)
+            if (strcmp(s.c_str(), package_name) == 0) {
                 return 1;
+            }
         }
     } else {
         char path[PATH_MAX];
