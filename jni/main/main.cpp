@@ -102,7 +102,7 @@ __attribute__((visibility("default"))) int nativeForkAndSpecializePost(JNIEnv *e
         if (env) {
             LOGI("inject android.os.Build for %s ", package_name);
 
-            jclass build_class = env->FindClass("android.os.Build");
+            jclass build_class = env->FindClass("android/os/Build");
             jfieldID brand_id = env->GetStaticFieldID(build_class, "BRAND", "Ljava/lang/String;");
             jfieldID manufacturer_id = env->GetStaticFieldID(build_class, "MANUFACTURER", "Ljava/lang/String;");
             jfieldID product_id = env->GetStaticFieldID(build_class, "PRODUCT", "Ljava/lang/String;");

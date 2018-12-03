@@ -15,4 +15,6 @@ MiPushFramework with value map below
 * `ro.product.brand` -> `Xiaomi`
 * `ro.product.name` -> `Xiaomi`
 
+also we add some prop inspired by [MiPushFake](https://github.com/Magisk-Modules-Repo/MiPushFake)
+
  
