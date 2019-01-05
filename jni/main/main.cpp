@@ -26,16 +26,15 @@
 static char package_name[256];
 static int uid;
 static int enable_hook;
-static std::vector<std::string> packages = {};
+static std::vector<std::string> blackList = {"com.google.android",
+                                            "de.robv.android.xposed.installer",
+                                            "com.xiaomi.xmsf",
+                                            "com.tencent.mm",
+                                            "top.trumeet.mipush"};
 
 int is_app_need_hook(JNIEnv *env, jstring appDataDir) {
     if (!appDataDir)
         return 0;
-
-
-    if (access(FAKE_CONFIGURATION_GLOBAL, F_OK) == 0) {
-        return 1;
-    }
 
     const char *app_data_dir = env->GetStringUTFChars(appDataDir, NULL);
 
@@ -50,13 +49,19 @@ int is_app_need_hook(JNIEnv *env, jstring appDataDir) {
 
     env->ReleaseStringUTFChars(appDataDir, app_data_dir);
 
-    if (access(CONFIG_PATH "/packages", R_OK) != 0) {
-        for (auto &s : packages) {
-            if (strcmp(s.c_str(), package_name) == 0) {
-                return 1;
-            }
+    std::string pkgName = package_name;
+    for (auto &s : blackList) {
+        if (pkgName.find(s) != std::string::npos) {
+            return 0;
         }
-    } else {
+    }
+
+
+    if (access(FAKE_CONFIGURATION_GLOBAL, F_OK) == 0) {
+        return 1;
+    }
+
+    if (access(CONFIG_PATH "/packages", R_OK) == 0) {
         char path[PATH_MAX];
         snprintf(path, PATH_MAX, CONFIG_PATH "/packages/%d.%s", user, package_name);
         return access(path, F_OK) == 0;
@@ -104,8 +109,10 @@ __attribute__((visibility("default"))) int nativeForkAndSpecializePost(JNIEnv *e
 
             jclass build_class = env->FindClass("android/os/Build");
             jfieldID brand_id = env->GetStaticFieldID(build_class, "BRAND", "Ljava/lang/String;");
-            jfieldID manufacturer_id = env->GetStaticFieldID(build_class, "MANUFACTURER", "Ljava/lang/String;");
-            jfieldID product_id = env->GetStaticFieldID(build_class, "PRODUCT", "Ljava/lang/String;");
+            jfieldID manufacturer_id = env->GetStaticFieldID(build_class, "MANUFACTURER",
+                                                             "Ljava/lang/String;");
+            jfieldID product_id = env->GetStaticFieldID(build_class, "PRODUCT",
+                                                        "Ljava/lang/String;");
 
             jstring new_str = env->NewStringUTF("Xiaomi");
             env->SetStaticObjectField(build_class, brand_id, new_str);

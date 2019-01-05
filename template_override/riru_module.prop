@@ -1,5 +1,5 @@
 name=Riru - MiPushFakeModule
-version=v7
-versionCode=7
+version=v8
+versionCode=8
 author=Timothy
 description=Fake as XiaoMI device by hook system_property_get. Require Riru-Core v9+ installed.
