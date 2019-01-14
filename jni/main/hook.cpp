@@ -27,8 +27,16 @@ void set_sim_operator_country(const char *string) {
 }
 
 #define XHOOK_REGISTER(NAME) \
-    if (xhook_register(".*", #NAME, (void*) new_##NAME, (void **) &old_##NAME) != 0) \
+    if (xhook_register(".*", #NAME, (void*) new_##NAME, (void **) &old_##NAME) == 0) { \
+        if (riru_get_version() >= 8) { \
+            void *f = riru_get_func(#NAME); \
+            if (f != nullptr) \
+                memcpy(&old_##NAME, &f, sizeof(void *)); \
+            riru_set_func(#NAME, (void *) new_##NAME); \
+        } \
+    } else { \
         LOGE("failed to register hook " #NAME "."); \
+    }
 
 #define NEW_FUNC_DEF(ret, func, ...) \
     static ret (*old_##func)(__VA_ARGS__); \
@@ -66,26 +74,11 @@ void install_hook(const char *package_name, int user) {
     XHOOK_REGISTER(__system_property_get);
 
     char sdk[PROP_VALUE_MAX + 1];
-    int sdkLevel = 0;
-    if (__system_property_get("ro.build.version.sdk", sdk) > 0 && (sdkLevel = atoi(sdk)) >= 28)
+    if (__system_property_get("ro.build.version.sdk", sdk) > 0 && atoi(sdk) >= 28)
         XHOOK_REGISTER(_ZN7android4base11GetPropertyERKNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES9_);
 
     if (xhook_refresh(0) == 0)
         xhook_clear();
     else
         LOGE("failed to refresh hook");
-
-    if (riru_get_version() >= 8) {
-        void *f = riru_get_func("__system_property_get");
-        if (f != nullptr) old___system_property_get = (int (*)(const char *, char *)) f;
-        riru_set_func("__system_property_get", (void *) new___system_property_get);
-
-        if (sdkLevel >= 28) {
-            f = riru_get_func("_ZN7android4base11GetPropertyERKNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES9_");
-            if (f != nullptr) old__ZN7android4base11GetPropertyERKNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES9_ = (std::string (*)(const std::string &, const std::string &)) f;
-
-            riru_set_func("_ZN7android4base11GetPropertyERKNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES9_",
-                          (void *) new__ZN7android4base11GetPropertyERKNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES9_);
-        }
-    }
 }

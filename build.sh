@@ -9,10 +9,10 @@ function copy_files {
   cp $MODULE_NAME/template_override/config.sh $TMP_DIR_MAGISK
   cp $MODULE_NAME/template_override/module.prop $TMP_DIR_MAGISK
   
-  echo "310030" > $TMP_DIR_MAGISK/data/misc/riru/modules/$NAME/gsm.sim.operator.numeric
-  echo "us" > $TMP_DIR_MAGISK/data/misc/riru/modules/$NAME/gsm.sim.operator.iso-country
+  echo -n "310030" > $TMP_DIR_MAGISK/data/misc/riru/modules/$NAME/gsm.sim.operator.numeric
+  echo -n "us" > $TMP_DIR_MAGISK/data/misc/riru/modules/$NAME/gsm.sim.operator.iso-country
   mkdir $TMP_DIR_MAGISK/data/misc/riru/modules/$NAME/packages
   touch $TMP_DIR_MAGISK/data/misc/riru/modules/$NAME/packages/com.google.android.gms
   touch $TMP_DIR_MAGISK/data/misc/riru/modules/$NAME/packages/com.google.android.gsf
-  touch $TMP_DIR_MAGISK/data/misc/riru/modules/$NAME/packages/com.google.android.apps.map
+  touch $TMP_DIR_MAGISK/data/misc/riru/modules/$NAME/packages/com.google.android.apps.maps
 }
