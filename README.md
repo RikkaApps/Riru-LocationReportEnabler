@@ -27,8 +27,10 @@ and the return value will be changed
   If `/data/misc/riru/location_report_enabler/packages` not exists, default package list will be used.
 
 * Return value
+  
+  ```
+  echo -n 310030 > /data/misc/riru/modules/location_report_enabler/gsm.sim.operator.numeric
+  echo -n us > /data/misc/riru/modules/location_report_enabler/gsm.sim.operator.iso-country
+  ```
 
-  ```
-  echo 310030 > /data/misc/riru/modules/location_report_enabler/gsm.sim.operator.numeric
-  echo us > /data/misc/riru/modules/location_report_enabler/gsm.sim.operator.iso-country
-  ```
+  **Don't forget `-n`, or the return data will contain a newline**
