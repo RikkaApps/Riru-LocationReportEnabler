@@ -101,6 +101,13 @@ fail() {
   exit 1
 }
 
+check_riru_version() {
+  [[ ! -f "/data/misc/riru/api_version" ]] && fail "! Please Install Riru - Core v18 or above"
+  VERSION=$(cat "/data/misc/riru/api_version")
+  ui_print "- Riru API version is $VERSION"
+  [[ "$VERSION" -ge 3 ]] || fail "! Please Install Riru - Core v18 or above"
+}
+
 check_architecture() {
   if [[ "$ARCH" != "arm" && "$ARCH" != "arm64" ]]; then
     ui_print "- Unsupported platform: $ARCH"
@@ -108,11 +115,23 @@ check_architecture() {
   else
     ui_print "- Device platform: $ARCH"
   fi
+
+  check_riru_version
 }
 
 copy_files() {
-  if [ $IS64BIT = false ]; then
-	ui_print "- Removing unnecessary files"
+  if [[ "$ARCH" == "x86" || "$ARCH" == "x64" ]]; then
+    ui_print "- Removing arm/arm64 libraries"
+    rm -rf "$MODPATH/system/lib"
+    rm -rf "$MODPATH/system/lib64"
+    ui_print "- Extracting x86/64 libraries"
+	unzip -o "$ZIP" 'system_x86/*' -d $MODPATH >&2
+    mv "$MODPATH/system_x86/lib" "$MODPATH/system/lib"
+    mv "$MODPATH/system_x86/lib64" "$MODPATH/system/lib64"
+  fi
+
+  if [[ "$IS64BIT" = false ]]; then
+	ui_print "- Removing 64-bit libraries"
 	rm -rf "$MODPATH/system/lib64"
   fi
 
@@ -122,10 +141,10 @@ copy_files() {
   TARGET="/data/misc/riru/modules"
   
   # TODO: do not overwrite if file exists
-  [ -d $TARGET ] || mkdir -p $TARGET || fail "- Can't mkdir -p $TARGET"
-  cp -af "$MODPATH$TARGET/." "$TARGET" || fail "- Can't cp -af $MODPATH$TARGET/. $TARGET"
+  [[ -d "$TARGET" ]] || mkdir -p "$TARGET" || fail "! Can't mkdir -p $TARGET"
+  cp -af "$MODPATH$TARGET/." "$TARGET" || fail "! Can't cp -af $MODPATH$TARGET/. $TARGET"
   
-  rm -rf $MODPATH/data 2>/dev/null
+  rm -rf "$MODPATH/data" 2>/dev/null
   
   ui_print "- Files copied"
 }

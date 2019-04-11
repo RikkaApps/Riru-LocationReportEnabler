@@ -11,7 +11,6 @@
 #include <utility>
 #include <string>
 #include <sys/system_properties.h>
-#include <riru.h>
 
 #include "logging.h"
 #include "hook.h"
@@ -33,7 +32,7 @@ int is_app_need_hook(JNIEnv *env, jstring appDataDir) {
         return 0;
 
 
-    const char *app_data_dir = env->GetStringUTFChars(appDataDir, NULL);
+    const char *app_data_dir = env->GetStringUTFChars(appDataDir, nullptr);
 
     int user = 0;
     if (sscanf(app_data_dir, "/data/%*[^/]/%d/%s", &user, package_name) != 2) {
@@ -84,21 +83,15 @@ void nativeForkAndSpecialize(int res, int enable_hook, const char *package_name,
 }
 
 extern "C" {
-__attribute__((visibility("default"))) void nativeForkAndSpecializePre(JNIEnv *env, jclass clazz,
-                                                                       jint _uid, jint gid,
-                                                                       jintArray gids,
-                                                                       jint runtime_flags,
-                                                                       jobjectArray rlimits,
-                                                                       jint _mount_external,
-                                                                       jstring se_info,
-                                                                       jstring se_name,
-                                                                       jintArray fdsToClose,
-                                                                       jintArray fdsToIgnore,
-                                                                       jboolean is_child_zygote,
-                                                                       jstring instructionSet,
-                                                                       jstring appDataDir) {
-    uid = _uid;
-    enable_hook = is_app_need_hook(env, appDataDir);
+__attribute__((visibility("default"))) void nativeForkAndSpecializePre(
+        JNIEnv *env, jclass clazz, jint *_uid, jint *gid, jintArray *gids, jint *runtime_flags,
+        jobjectArray *rlimits, jint *_mount_external, jstring *se_info, jstring *se_name,
+        jintArray *fdsToClose, jintArray *fdsToIgnore, jboolean *is_child_zygote,
+        jstring *instructionSet, jstring *appDataDir, jstring *packageName,
+        jobjectArray *packagesForUID, jobjectArray *visibleVolIDs) {
+
+    uid = *_uid;
+    enable_hook = is_app_need_hook(env, *appDataDir);
 
     if (enable_hook)
         load_config();

@@ -74,8 +74,9 @@ void install_hook(const char *package_name, int user) {
     XHOOK_REGISTER(__system_property_get);
 
     char sdk[PROP_VALUE_MAX + 1];
-    if (__system_property_get("ro.build.version.sdk", sdk) > 0 && atoi(sdk) >= 28)
+    if (__system_property_get("ro.build.version.sdk", sdk) > 0 && atoi(sdk) >= 28) {
         XHOOK_REGISTER(_ZN7android4base11GetPropertyERKNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES9_);
+    }
 
     if (xhook_refresh(0) == 0)
         xhook_clear();
