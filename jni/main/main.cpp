@@ -73,6 +73,48 @@ void load_config() {
     //empty
 }
 
+
+
+void injectBuild(JNIEnv *env) {
+    if (env == 0) {
+        LOGW("failed to inject android.os.Build for %s due to env is null", package_name);
+        return;
+    }
+    LOGI("inject android.os.Build for %s ", package_name);
+
+    jclass build_class = env->FindClass("android/os/Build");
+    if (build_class == 0) {
+        LOGW("failed to inject android.os.Build for %s due to build is null", package_name);
+        return;
+    }
+
+    jstring new_str = env->NewStringUTF("Xiaomi");
+
+    jfieldID brand_id = env->GetStaticFieldID(build_class, "BRAND", "Ljava/lang/String;");
+    if (brand_id != 0) {
+        env->SetStaticObjectField(build_class, brand_id, new_str);
+    }
+
+    jfieldID manufacturer_id = env->GetStaticFieldID(build_class, "MANUFACTURER", "Ljava/lang/String;");
+    if (manufacturer_id != 0) {
+        env->SetStaticObjectField(build_class, manufacturer_id, new_str);
+    }
+
+    jfieldID product_id = env->GetStaticFieldID(build_class, "PRODUCT", "Ljava/lang/String;");
+    if (product_id != 0) {
+        env->SetStaticObjectField(build_class, product_id, new_str);
+    }
+
+    if(env->ExceptionCheck())
+    {
+        env->ExceptionClear();
+    }
+
+    env->DeleteLocalRef(new_str);
+
+}
+
+
 void nativeForkAndSpecialize(int res, int enable_hook, const char *package_name, jint uid) {
     if (res == 0 && enable_hook) {
         install_hook(package_name, uid / 100000);
@@ -104,26 +146,12 @@ __attribute__((visibility("default"))) int nativeForkAndSpecializePost(JNIEnv *e
                                                                        jint res) {
 
     if (res == 0 && enable_hook) {
-        if (env) {
-            LOGI("inject android.os.Build for %s ", package_name);
-
-            jclass build_class = env->FindClass("android/os/Build");
-            jfieldID brand_id = env->GetStaticFieldID(build_class, "BRAND", "Ljava/lang/String;");
-            jfieldID manufacturer_id = env->GetStaticFieldID(build_class, "MANUFACTURER",
-                                                             "Ljava/lang/String;");
-            jfieldID product_id = env->GetStaticFieldID(build_class, "PRODUCT",
-                                                        "Ljava/lang/String;");
-
-            jstring new_str = env->NewStringUTF("Xiaomi");
-            env->SetStaticObjectField(build_class, brand_id, new_str);
-            env->SetStaticObjectField(build_class, product_id, new_str);
-            env->SetStaticObjectField(build_class, manufacturer_id, new_str);
-
-            env->DeleteLocalRef(new_str);
-        }
+        injectBuild(env);
     }
 
     nativeForkAndSpecialize(res, enable_hook, package_name, uid);
     return !enable_hook;
 }
+
+
 }

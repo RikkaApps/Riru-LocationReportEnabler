@@ -28,25 +28,25 @@ NEW_FUNC_DEF(int, __system_property_get, const char *key, char *value) {
     if (key) {
         if (strcmp("ro.miui.ui.version.name", key) == 0) {
             strcpy(value, "V9");
-            LOGI("system_property_get: %s -> %s", key, value);
+            //LOGI("system_property_get: %s -> %s", key, value);
         } else if (strcmp("ro.miui.ui.version.code", key) == 0) {
             strcpy(value, "7");
-            LOGI("system_property_get: %s -> %s", key, value);
+            //LOGI("system_property_get: %s -> %s", key, value);
         } else if (strcmp("ro.miui.version.code_time", key) == 0) {
             strcpy(value, "1527550858");
-            LOGI("system_property_get: %s -> %s", key, value);
+            //LOGI("system_property_get: %s -> %s", key, value);
         } else if (strcmp("ro.miui.internal.storage", key) == 0) {
             strcpy(value, "/sdcard/");
-            LOGI("system_property_get: %s -> %s", key, value);
+            //LOGI("system_property_get: %s -> %s", key, value);
         } else if (strcmp("ro.product.manufacturer", key) == 0) {
             strcpy(value, "Xiaomi");
-            LOGI("system_property_get: %s -> %s", key, value);
+            //LOGI("system_property_get: %s -> %s", key, value);
         } else if (strcmp("ro.product.brand", key) == 0) {
             strcpy(value, "Xiaomi");
-            LOGI("system_property_get: %s -> %s", key, value);
+            //LOGI("system_property_get: %s -> %s", key, value);
         } else if (strcmp("ro.product.name", key) == 0) {
             strcpy(value, "Xiaomi");
-            LOGI("system_property_get: %s -> %s", key, value);
+            //LOGI("system_property_get: %s -> %s", key, value);
         }
 
     }
@@ -58,25 +58,25 @@ NEW_FUNC_DEF(std::string, _ZN7android4base11GetPropertyERKNSt3__112basic_stringI
     
     if (strcmp("ro.miui.ui.version.name", key.c_str()) == 0) {
         res = "V9";
-        LOGI("android::base::GetProperty: %s -> %s", key.c_str(), res.c_str());
+        //LOGI("android::base::GetProperty: %s -> %s", key.c_str(), res.c_str());
     } else if (strcmp("ro.miui.ui.version.code", key.c_str()) == 0) {
         res = "7";
-        LOGI("android::base::GetProperty: %s -> %s", key.c_str(), res.c_str());
+        //LOGI("android::base::GetProperty: %s -> %s", key.c_str(), res.c_str());
     } else if (strcmp("ro.miui.version.code_time", key.c_str()) == 0) {
         res = "1527550858";
-        LOGI("android::base::GetProperty: %s -> %s", key.c_str(), res.c_str());
+        //LOGI("android::base::GetProperty: %s -> %s", key.c_str(), res.c_str());
     } else if (strcmp("ro.miui.internal.storage", key.c_str()) == 0) {
         res = "/sdcard/";
-        LOGI("android::base::GetProperty: %s -> %s", key.c_str(), res.c_str());
+        //LOGI("android::base::GetProperty: %s -> %s", key.c_str(), res.c_str());
     } else if (strcmp("ro.product.manufacturer", key.c_str()) == 0) {
         res = "Xiaomi";
-        LOGI("android::base::GetProperty: %s -> %s", key.c_str(), res.c_str());
+        //LOGI("android::base::GetProperty: %s -> %s", key.c_str(), res.c_str());
     } else if (strcmp("ro.product.brand", key.c_str()) == 0) {
         res = "Xiaomi";
-        LOGI("android::base::GetProperty: %s -> %s", key.c_str(), res.c_str());
+        //LOGI("android::base::GetProperty: %s -> %s", key.c_str(), res.c_str());
     } else if (strcmp("ro.product.name", key.c_str()) == 0) {
         res = "Xiaomi";
-        LOGI("android::base::GetProperty: %s -> %s", key.c_str(), res.c_str());
+        //LOGI("android::base::GetProperty: %s -> %s", key.c_str(), res.c_str());
     }
     return res;
 }
