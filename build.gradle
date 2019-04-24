@@ -37,6 +37,8 @@ def isWindows = org.gradle.internal.os.OperatingSystem.current().isWindows()
 def libPathRelease = "$buildDir/ndkBuild/release/lib"
 def zipPathMagiskRelease = "$buildDir/tmp/release/magisk"
 
+import org.apache.tools.ant.filters.FixCrLfFilter
+
 task copyFilesMagiskRelease(type: Copy) {
     from 'template_override/module.prop'
     into zipPathMagiskRelease
@@ -48,6 +50,8 @@ task copyFilesMagiskRelease(type: Copy) {
                 .replaceAll('%%%AUTHOR%%%', moduleAuthor)
                 .replaceAll('%%%DESCRIPTION%%%', moduleDescriptionMagisk)
     }
+    filter(FixCrLfFilter.class,
+            eol: FixCrLfFilter.CrLf.newInstance("lf"))
 
     finalizedBy('copyRiruPropMagiskRelease')
 
@@ -85,6 +89,8 @@ task copyRiruPropMagiskRelease(type: Copy) {
                 .replaceAll('%%%DESCRIPTION%%%', moduleDescription)
                 .replaceAll('%%%API%%%', riruApi.toString())
     }
+    filter(FixCrLfFilter.class,
+            eol: FixCrLfFilter.CrLf.newInstance("lf"))
 
     doLast {
         file("$zipPathMagiskRelease/riru_module.prop").delete()
