@@ -1,7 +1,7 @@
-id=riru_location_report_enabler
-name=Riru - Location Report Enabler
-version=v8
-versionCode=8
-author=Rikka
-description=Enable location report by hook system_property_get. Require Riru - Core installed.
+id=%%%ID%%%
+name=%%%NAME%%%
+version=%%%VERSION_NAME%%%
+versionCode=%%%VERSION_CODE%%%
+author=%%%AUTHOR%%%
+description=%%%DESCRIPTION%%%
 minMagisk=17000
