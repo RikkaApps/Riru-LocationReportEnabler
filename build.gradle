@@ -24,13 +24,13 @@ def moduleId = "location_report_enabler"
 def moduleName = "Location Report Enabler"
 def moduleAuthor = "Rikka"
 def moduleDescription = "Enable Google location report by hook system_property_get (and android::base::GetProperty for API 28+)."
-def versionName = "v8"
-def versionCode = 8
-def riruApi = 3
+def versionName = "v9"
+def versionCode = 6
+def riruApi = 4
 
 def moduleIdMagisk = "riru_location_report_enabler"
 def moduleNameMagisk = "Riru - $moduleName"
-def moduleDescriptionMagisk = "$moduleDescription Requires Riru - Core v18 or above installed."
+def moduleDescriptionMagisk = "$moduleDescription Requires Riru - Core v19 or above installed."
 def zipNameMagisk = "magisk-${project.name}-${versionName}.zip"
 
 def isWindows = org.gradle.internal.os.OperatingSystem.current().isWindows()
