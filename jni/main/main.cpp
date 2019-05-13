@@ -20,7 +20,11 @@ static int uid;
 static int enable_hook;
 
 static bool is_app_need_hook(JNIEnv *env, jstring jAppDataDir, jstring jPackageName) {
-    if (jAppDataDir) {
+    if (jPackageName) {
+        const char *packageName = env->GetStringUTFChars(jPackageName, nullptr);
+        sprintf(package_name, "%s", packageName);
+        env->ReleaseStringUTFChars(jPackageName, packageName);
+    } else if (jAppDataDir) {
         const char *appDataDir = env->GetStringUTFChars(jAppDataDir, nullptr);
         int user = 0;
         if (sscanf(appDataDir, "/data/%*[^/]/%d/%s", &user, package_name) != 2) {
@@ -31,10 +35,6 @@ static bool is_app_need_hook(JNIEnv *env, jstring jAppDataDir, jstring jPackageN
             }
         }
         env->ReleaseStringUTFChars(jAppDataDir, appDataDir);
-    } else if (jPackageName) {
-        const char *packageName = env->GetStringUTFChars(jPackageName, nullptr);
-        sprintf(package_name, "%s", packageName);
-        env->ReleaseStringUTFChars(jPackageName, packageName);
     } else {
         return false;
     }
