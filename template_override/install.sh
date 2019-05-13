@@ -142,13 +142,31 @@ check_architecture() {
   fi
 }
 
+remove_existed_config_file() {
+  TARGET=$1
+  CONFIG_FILE="location_report_enabler/$2"
+  if [[ -f "$TARGET/$CONFIG_FILE" ]]; then
+    ui_print "- Config $2 exists"
+    rm -f "$TMPDIR/$TARGET/$CONFIG_FILE"
+  fi
+}
+
+remove_existed_config_dir() {
+  TARGET=$1
+  CONFIG_FILE="location_report_enabler/$2"
+  if [[ -d "$TARGET/$CONFIG_FILE" ]]; then
+    ui_print "- Config $2 exists"
+    rm -rf "$TMPDIR/$TARGET/$CONFIG_FILE"
+  fi
+}
+
 on_install() {
   check_architecture
   check_riru_version
 
   if [[ "$ARCH" == "x86" || "$ARCH" == "x64" ]]; then
     ui_print "- Extracting x86/64 libraries"
-	unzip -o "$ZIPFILE" 'system_x86/*' -d $MODPATH >&2
+    unzip -o "$ZIPFILE" 'system_x86/*' -d $MODPATH >&2
     mv "$MODPATH/system_x86/lib" "$MODPATH/system/lib"
     mv "$MODPATH/system_x86/lib64" "$MODPATH/system/lib64"
   else
@@ -157,8 +175,8 @@ on_install() {
   fi
 
   if [[ "$IS64BIT" = false ]]; then
-	ui_print "- Removing 64-bit libraries"
-	rm -rf "$MODPATH/system/lib64"
+    ui_print "- Removing 64-bit libraries"
+    rm -rf "$MODPATH/system/lib64"
   fi
 
   TARGET="$RIRU_PATH/modules"
@@ -166,7 +184,11 @@ on_install() {
   ui_print "- Extracting extra files"
   unzip -o "$ZIPFILE" 'data/*' -d "$TMPDIR" >&2
 
- [[ -d "$TARGET" ]] || mkdir -p "$TARGET" || abort "! Can't mkdir -p $TARGET"
+  remove_existed_config_file $TARGET "gsm.sim.operator.iso-country"
+  remove_existed_config_file $TARGET "gsm.sim.operator.numeric"
+  remove_existed_config_dir $TARGET "packages"
+
+  [[ -d "$TARGET" ]] || mkdir -p "$TARGET" || abort "! Can't mkdir -p $TARGET"
   cp -af "$TMPDIR$TARGET/." "$TARGET" || abort "! Can't cp -af $TMPDIR$TARGET/. $TARGET"
 
   ui_print "- Files copied"
