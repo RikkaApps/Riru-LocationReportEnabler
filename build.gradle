@@ -56,8 +56,11 @@ task copyFilesMagiskRelease(type: Copy) {
     finalizedBy('copyRiruPropMagiskRelease')
 
     doLast {
+        file("$zipPathMagiskRelease/common").mkdirs()
         file("$zipPathMagiskRelease/system").mkdirs()
         file("$zipPathMagiskRelease/system_x86").mkdirs()
+
+        file("$zipPathMagiskRelease/post-fs-data.sh").renameTo("$zipPathMagiskRelease/common/post-fs-data.sh")
 
         file("$libPathRelease/arm64-v8a").renameTo("$zipPathMagiskRelease/system/lib64")
         file("$libPathRelease/armeabi-v7a").renameTo("$zipPathMagiskRelease/system/lib")
