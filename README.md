@@ -1,10 +1,10 @@
-# Riru-LocationReportEnabler
+# Riru - Location Report Enabler
 
-A module of [Riru](https://github.com/RikkaApps/Riru). Enable Google's location report by hook `__system_property_get` in some packages.
+A module of [Riru](https://github.com/RikkaApps/Riru). Enable Google location report and Google app timeline by hook `__system_property_get` in specific packages.
 
 ## What does this module do
 
-By default, `__system_property_get` (`android::base::GetProperty` on Pie+) will be hooked in these packages
+By default, `__system_property_get` (and `android::base::GetProperty` on Pie+) will be hooked in these packages
 
 * com.google.android.gsf
 * com.google.android.gms
@@ -23,8 +23,6 @@ and the return value will be changed
   touch /data/misc/riru/modules/location_report_enabler/packages/<package name>
   rm /data/misc/riru/modules/location_report_enabler/packages/<package name>
   ```
-
-  If `/data/misc/riru/location_report_enabler/packages` not exists, default package list will be used.
 
 * Return value
   
