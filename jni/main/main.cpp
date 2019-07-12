@@ -72,7 +72,7 @@ __attribute__((visibility("default"))) void nativeForkAndSpecializePre(
         jobjectArray *packagesForUID, jstring *sandboxId) {
 
     uid = *_uid;
-    enable_hook = is_app_need_hook(env, *appDataDir, nullptr);
+    enable_hook = is_app_need_hook(env, *appDataDir, *packageName);
 
     if (enable_hook)
         load_config();
@@ -91,7 +91,7 @@ __attribute__((visibility("default"))) void specializeAppProcessPre(
         jstring *packageName, jobjectArray *packagesForUID, jstring *sandboxId) {
 
     uid = *_uid;
-    enable_hook = is_app_need_hook(env, nullptr, *packageName);
+    enable_hook = is_app_need_hook(env, *appDataDir, *packageName);
 
     if (enable_hook)
         load_config();
