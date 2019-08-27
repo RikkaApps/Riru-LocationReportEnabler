@@ -15,15 +15,10 @@
 #include "riru.h"
 #include "logging.h"
 
-static const char *sim_operator_numeric = "310030";
-static const char *sim_operator_country = "us";
+static const char *ro_product_mod_device;
 
-void set_sim_operator_numeric(const char *string) {
-    sim_operator_numeric = strdup(string);
-}
-
-void set_sim_operator_country(const char *string) {
-    sim_operator_country = strdup(string);
+void set_ro_product_mod_device(const char *string) {
+    ro_product_mod_device = strdup(string);
 }
 
 #define XHOOK_REGISTER(NAME) \
@@ -45,12 +40,13 @@ void set_sim_operator_country(const char *string) {
 NEW_FUNC_DEF(int, __system_property_get, const char *key, char *value) {
     int res = old___system_property_get(key, value);
     if (key) {
-        if (strcmp("gsm.sim.operator.numeric", key) == 0) {
-            strcpy(value, sim_operator_numeric);
-            LOGI("system_property_get: %s -> %s", key, value);
-        } else if (strcmp("gsm.sim.operator.iso-country", key) == 0) {
-            strcpy(value, sim_operator_country);
-            LOGI("system_property_get: %s -> %s", key, value);
+        if (strcmp("ro.product.mod_device", key) == 0) {
+            if (ro_product_mod_device && *ro_product_mod_device != '\0') {
+                strcpy(value, ro_product_mod_device);
+                LOGI("system_property_get: %s -> %s", key, value);
+            } else {
+                LOGI("Cannot get key:ro.product.mod_device. Ignore... system_property_get: %s -> %s", key, value);
+            }
         }
     }
     return res;
@@ -58,12 +54,13 @@ NEW_FUNC_DEF(int, __system_property_get, const char *key, char *value) {
 
 NEW_FUNC_DEF(std::string, _ZN7android4base11GetPropertyERKNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES9_, const std::string &key, const std::string &default_value) {
     std::string res = old__ZN7android4base11GetPropertyERKNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES9_(key, default_value);
-    if (strcmp("gsm.sim.operator.numeric", key.c_str()) == 0) {
-        res = sim_operator_numeric;
-        LOGI("android::base::GetProperty: %s -> %s", key.c_str(), res.c_str());
-    } else if (strcmp("gsm.sim.operator.iso-country", key.c_str()) == 0) {
-        res = sim_operator_country;
-        LOGI("android::base::GetProperty: %s -> %s", key.c_str(), res.c_str());
+    if (strcmp("ro.product.mod_device", key.c_str()) == 0) {
+        if (ro_product_mod_device && *ro_product_mod_device != '\0') {
+            res = ro_product_mod_device;
+            LOGI("android::base::GetProperty: %s -> %s", key.c_str(), res.c_str());
+        } else {
+            LOGI("Cannot get key:ro.product.mod_device. Ignore... android::base::GetProperty: %s -> %s", key, value);
+        }
     }
     return res;
 }
