@@ -13,7 +13,7 @@
 #include "hook.h"
 #include "misc.h"
 
-#define CONFIG_PATH "/data/misc/riru/modules/location_report_enabler"
+#define CONFIG_PATH "/data/misc/riru/modules/miui_global_localization"
 
 static char package_name[256];
 static int uid;
@@ -48,17 +48,9 @@ static bool is_app_need_hook(JNIEnv *env, jstring jAppDataDir, jstring jPackageN
 static void load_config() {
     char buf[PROP_VALUE_MAX + 1];
     int fd;
-    fd = open(CONFIG_PATH "/gsm.sim.operator.numeric", O_RDONLY | O_CLOEXEC);
+    fd = open(CONFIG_PATH "/ro.product.mod_device", O_RDONLY | O_CLOEXEC);
     if (fd > 0 && fdgets(buf, sizeof(buf), fd) > 0)
-        set_sim_operator_numeric(buf);
-
-    if (fd > 0)
-        close(fd);
-
-    fd = open(CONFIG_PATH "/gsm.sim.operator.iso-country", O_RDONLY | O_CLOEXEC);
-    if (fd > 0 && fdgets(buf, sizeof(buf), fd) > 0)
-        set_sim_operator_country(buf);
-
+        set_ro_product_mod_device(buf);
     if (fd > 0)
         close(fd);
 }
