@@ -20,15 +20,15 @@ android {
     }
 }
 
-def moduleId = "location_report_enabler"
-def moduleName = "Location Report Enabler"
-def moduleAuthor = "Rikka"
-def moduleDescription = "Enable Google location report by hook system_property_get (and android::base::GetProperty for API 28+)."
-def versionName = "v9.2"
-def versionCode = 11
+def moduleId = "miui_global_localization"
+def moduleName = "Miui Global Localization"
+def moduleAuthor = "lelemka0"
+def moduleDescription = "Enable MIUI Global localization functions by hook system_property_get (and android::base::GetProperty for API 28+)."
+def versionName = "v1"
+def versionCode = 1
 def riruApi = 4
 
-def moduleIdMagisk = "riru_location_report_enabler"
+def moduleIdMagisk = "riru_miui_global_localization"
 def moduleNameMagisk = "Riru - $moduleName"
 def moduleDescriptionMagisk = "$moduleDescription Requires Riru - Core v19 or above installed."
 def zipNameMagisk = "magisk-${project.name}-${versionName}.zip"
@@ -70,10 +70,7 @@ task copyFilesMagiskRelease(type: Copy) {
         def path = "$zipPathMagiskRelease/data/misc/riru/modules/$moduleId"
         file("$path/packages").mkdirs()
 
-        file("$path/gsm.sim.operator.numeric").createNewFile()
-        file("$path/gsm.sim.operator.numeric").text = "310030"
-        file("$path/gsm.sim.operator.iso-country").createNewFile()
-        file("$path/gsm.sim.operator.iso-country").text = "us"
+        file("$path/ro.product.mod_device").createNewFile()
         file("$path/packages/com.google.android.gms").createNewFile()
         file("$path/packages/com.google.android.gsf").createNewFile()
         file("$path/packages/com.google.android.apps.maps").createNewFile()
