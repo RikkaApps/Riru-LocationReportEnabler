@@ -69,7 +69,7 @@ NEW_FUNC_DEF(std::string, _ZN7android4base11GetPropertyERKNSt3__112basic_stringI
 }
 
 void install_hook(const char *package_name, int user) {
-    LOGI("install hook for %s (%d)", package_name, user);
+    LOGI("install hook for %d:%s", user, package_name);
 
     XHOOK_REGISTER(__system_property_get);
 

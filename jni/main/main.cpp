@@ -27,12 +27,22 @@ static bool is_app_need_hook(JNIEnv *env, jstring jAppDataDir, jstring jPackageN
     } else if (jAppDataDir) {
         const char *appDataDir = env->GetStringUTFChars(jAppDataDir, nullptr);
         int user = 0;
-        if (sscanf(appDataDir, "/data/%*[^/]/%d/%s", &user, package_name) != 2) {
-            if (sscanf(appDataDir, "/data/%*[^/]/%s", package_name) != 1) {
-                package_name[0] = '\0';
-                LOGW("can't parse %s", appDataDir);
-                return false;
-            }
+        while (true) {
+            // /data/user/<user_id>/<package>
+            if (sscanf(appDataDir, "/data/%*[^/]/%d/%s", &user, package_name) == 2)
+                break;
+
+            // /mnt/expand/<id>/user/<user_id>/<package>
+            if (sscanf(appDataDir, "/mnt/expand/%*[^/]/%*[^/]/%d/%s", &user, package_name) == 2)
+                break;
+
+            // /data/data/<package>
+            if (sscanf(appDataDir, "/data/%*[^/]/%s", package_name) == 1)
+                break;
+
+            package_name[0] = '\0';
+            LOGW("can't parse %s", appDataDir);
+            return false;
         }
         env->ReleaseStringUTFChars(jAppDataDir, appDataDir);
     } else {
