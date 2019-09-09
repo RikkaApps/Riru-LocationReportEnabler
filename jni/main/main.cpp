@@ -41,7 +41,6 @@ static bool is_app_need_hook(JNIEnv *env, jstring jAppDataDir, jstring jPackageN
                 break;
 
             package_name[0] = '\0';
-            LOGW("can't parse %s", appDataDir);
             return false;
         }
         env->ReleaseStringUTFChars(jAppDataDir, appDataDir);
@@ -73,6 +72,20 @@ static void load_config() {
         close(fd);
 }
 
+static void appProcessPre(JNIEnv *env, jint _uid, jstring appDataDir, jstring packageName) {
+    uid = _uid;
+    enable_hook = is_app_need_hook(env, appDataDir, packageName);
+
+    if (enable_hook)
+        load_config();
+}
+
+static void appProcessPost() {
+    if (enable_hook) {
+        install_hook(package_name, uid / 100000);
+    }
+}
+
 extern "C" {
 __attribute__((visibility("default"))) void nativeForkAndSpecializePre(
         JNIEnv *env, jclass clazz, jint *_uid, jint *gid, jintArray *gids, jint *runtime_flags,
@@ -81,17 +94,14 @@ __attribute__((visibility("default"))) void nativeForkAndSpecializePre(
         jstring *instructionSet, jstring *appDataDir, jstring *packageName,
         jobjectArray *packagesForUID, jstring *sandboxId) {
 
-    uid = *_uid;
-    enable_hook = is_app_need_hook(env, *appDataDir, *packageName);
-
-    if (enable_hook)
-        load_config();
+    appProcessPre(env, *_uid, *appDataDir, *packageName);
 }
 
 __attribute__((visibility("default"))) int nativeForkAndSpecializePost(
         JNIEnv *env, jclass clazz, jint res) {
-    if (res == 0 && enable_hook) install_hook(package_name, uid / 100000);
-    return !enable_hook;
+    if (res != 0) return 0;
+    appProcessPost();
+    return 0;
 }
 
 __attribute__((visibility("default"))) void specializeAppProcessPre(
@@ -100,17 +110,12 @@ __attribute__((visibility("default"))) void specializeAppProcessPre(
         jboolean *startChildZygote, jstring *instructionSet, jstring *appDataDir,
         jstring *packageName, jobjectArray *packagesForUID, jstring *sandboxId) {
 
-    uid = *_uid;
-    enable_hook = is_app_need_hook(env, *appDataDir, *packageName);
-
-    if (enable_hook)
-        load_config();
+    appProcessPre(env, *_uid, *appDataDir, *packageName);
 }
 
 __attribute__((visibility("default"))) int specializeAppProcessPost(
         JNIEnv *env, jclass clazz) {
-
-    if (enable_hook) install_hook(package_name, uid / 100000);
-    return !enable_hook;
+    appProcessPost();
+    return 0;
 }
 }

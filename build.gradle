@@ -24,8 +24,8 @@ def moduleId = "location_report_enabler"
 def moduleName = "Location Report Enabler"
 def moduleAuthor = "Rikka"
 def moduleDescription = "Enable Google location report by hook system_property_get (and android::base::GetProperty for API 28+)."
-def versionName = "v9.2"
-def versionCode = 11
+def versionName = "v9.3"
+def versionCode = 12
 def riruApi = 4
 
 def moduleIdMagisk = "riru_location_report_enabler"
