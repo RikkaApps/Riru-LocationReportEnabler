@@ -1,7 +1,7 @@
 id=mipush_fake
 name=Riru - MiPushFakeModule
-version=v9
-versionCode=9
+version=v10
+versionCode=10
 author=Timothy
 description=Fake as XiaoMI device by hook system_property_get. Require Riru - Core installed.
 minMagisk=17000
