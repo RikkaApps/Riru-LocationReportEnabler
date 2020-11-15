@@ -1,0 +1,136 @@
+apply plugin: 'com.android.library'
+apply from: file(rootProject.file('module.gradle'))
+
+android {
+    compileSdkVersion rootProject.ext.targetSdkVersion
+    ndkVersion rootProject.ext.ndkVersion
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        externalNativeBuild {
+            cmake {
+                arguments "-DMODULE_NAME:STRING=riru_$moduleId",
+                        "-DRIRU_MODULE_API_VERSION=$moduleMaxRiruApiVersion",
+                        "-DRIRU_MODULE_VERSION=$moduleVersionCode",
+                        "-DRIRU_MODULE_VERSION_NAME:STRING=\"$moduleVersion\""
+
+            }
+        }
+    }
+    buildFeatures {
+        prefab true
+    }
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+            version "3.10.2"
+        }
+    }
+}
+
+repositories {
+    mavenLocal()
+    jcenter()
+    maven { url 'https://dl.bintray.com/rikkaw/Libraries' }
+}
+
+dependencies {
+    implementation 'rikka.ndk:riru:9.1'
+    implementation 'rikka.ndk.thirdparty:xhook:1.2.0'
+    implementation 'rikka.ndk.thirdparty:nativehelper:20201111'
+}
+
+def outDir = file("$rootDir/out")
+def magiskDir = file("$outDir/magisk_module")
+def zipName = "${magiskModuleProp['id'].replace('_', '-')}-${magiskModuleProp['version']}.zip"
+def riruDir = "$magiskDir/riru"
+
+
+import org.apache.tools.ant.filters.FixCrLfFilter
+
+import java.nio.file.Files
+import java.security.MessageDigest
+
+static def calcSha256(file) {
+    def md = MessageDigest.getInstance("SHA-256")
+    file.eachByte 4096, { bytes, size ->
+        md.update(bytes, 0, size);
+    }
+    return md.digest().encodeHex()
+}
+
+static def renameOrFail(File from, File to) {
+    if (!from.renameTo(to)) {
+        throw new IOException("Unable reanme file $from to $to")
+    }
+}
+
+android.libraryVariants.all { variant ->
+    def task = variant.assembleProvider.get()
+    task.doLast {
+        // clear
+        delete { delete magiskDir }
+
+        // copy from template
+        copy {
+            from "$rootDir/template/magisk_module"
+            into magiskDir.path
+            exclude 'riru.sh'
+        }
+        // copy riru.sh
+        copy {
+            from "$rootDir/template/magisk_module"
+            into magiskDir.path
+            include 'riru.sh'
+            filter { line ->
+                line.replaceAll('%%%RIRU_MODULE_ID%%%', moduleId)
+                        .replaceAll('%%%RIRU_MIN_API_VERSION%%%', moduleMinRiruApiVersion.toString())
+                        .replaceAll('%%%RIRU_MIN_VERSION_NAME%%%', moduleMinRiruVersionName)
+            }
+            filter(FixCrLfFilter.class,
+                    eol: FixCrLfFilter.CrLf.newInstance("lf"))
+        }
+        // copy .git files manually since gradle exclude it by default
+        Files.copy(file("$rootDir/template/magisk_module/.gitattributes").toPath(), file("${magiskDir.path}/.gitattributes").toPath())
+
+        // generate module.prop
+        def modulePropText = ""
+        magiskModuleProp.each { k, v -> modulePropText += "$k=$v\n" }
+        modulePropText = modulePropText.trim()
+        file("$magiskDir/module.prop").text = modulePropText
+
+        // generate module.prop for Riru
+        def riruModulePropText = ""
+        moduleProp.each { k, v -> riruModulePropText += "$k=$v\n" }
+        riruModulePropText = riruModulePropText.trim()
+        file(riruDir).mkdirs()
+
+        // module.prop.new will be renamed to module.prop in post-fs-data.sh
+        file("$riruDir/module.prop.new").text = riruModulePropText
+
+        // copy native files
+        def nativeOutDir = file("build/intermediates/cmake/$variant.name/obj")
+
+        file("$magiskDir/system").mkdirs()
+        file("$magiskDir/system_x86").mkdirs()
+        renameOrFail(file("$nativeOutDir/arm64-v8a"), file("$magiskDir/system/lib64"))
+        renameOrFail(file("$nativeOutDir/armeabi-v7a"), file("$magiskDir/system/lib"))
+        renameOrFail(file("$nativeOutDir/x86_64"), file("$magiskDir/system_x86/lib64"))
+        renameOrFail(file("$nativeOutDir/x86"), file("$magiskDir/system_x86/lib"))
+
+        // generate sha1sum
+        fileTree("$magiskDir").matching {
+            exclude "README.md", "META-INF"
+        }.visit { f ->
+            if (f.directory) return
+            file(f.file.path + ".sha256sum").text = calcSha256(f.file)
+        }
+    }
+    task.finalizedBy zipMagiskMoudle
+}
+
+task zipMagiskMoudle(type: Zip) {
+    from magiskDir
+    archiveName zipName
+    destinationDir outDir
+}

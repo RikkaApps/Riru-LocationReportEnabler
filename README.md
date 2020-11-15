@@ -4,7 +4,7 @@ A module of [Riru](https://github.com/RikkaApps/Riru). Enable Google location re
 
 ## What does this module do
 
-By default, `__system_property_get` (and `android::base::GetProperty` on Pie+) will be hooked in these packages
+By default, `__system_property_get` (and `__system_property_read_callback` on API 26+) will be hooked in these packages
 
 * com.google.android.gsf
 * com.google.android.gms
@@ -25,7 +25,7 @@ and the return value will be changed
   ```
 
 * Return value
-  
+
   ```
   echo -n 310030 > /data/misc/riru/modules/location_report_enabler/gsm.sim.operator.numeric
   echo -n us > /data/misc/riru/modules/location_report_enabler/gsm.sim.operator.iso-country

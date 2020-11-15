@@ -1,142 +1,34 @@
-apply plugin: 'com.android.library'
+apply plugin: 'idea'
 
-android {
-    compileSdkVersion rootProject.ext.targetSdkVersion
-    defaultConfig {
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
+idea.module {
+    excludeDirs += file('out')
+    resourceDirs += file('template')
+    resourceDirs += file('scripts')
+}
 
-        externalNativeBuild {
-            ndkBuild {
-                abiFilters 'arm64-v8a', 'armeabi-v7a'
-                arguments "NDK_PROJECT_PATH=jni/"
-            }
-        }
+buildscript {
+    repositories {
+        google()
+        jcenter()
     }
-    externalNativeBuild {
-        ndkBuild {
-            path 'jni/Android.mk'
-        }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:4.1.1'
     }
 }
 
-def moduleId = "location_report_enabler"
-def moduleName = "Location Report Enabler"
-def moduleAuthor = "Rikka"
-def moduleDescription = "Enable Google location report by hook system_property_get (and android::base::GetProperty for API 28+)."
-def versionName = "v9.3"
-def versionCode = 12
-def riruApi = 4
-
-def moduleIdMagisk = "riru_location_report_enabler"
-def moduleNameMagisk = "Riru - $moduleName"
-def moduleDescriptionMagisk = "$moduleDescription Requires Riru - Core v19 or above installed."
-def zipNameMagisk = "magisk-${project.name}-${versionName}.zip"
-
-def isWindows = org.gradle.internal.os.OperatingSystem.current().isWindows()
-def libPathRelease = "$buildDir/ndkBuild/release/lib"
-def zipPathMagiskRelease = "$buildDir/tmp/release/magisk"
-
-import org.apache.tools.ant.filters.FixCrLfFilter
-
-task copyFilesMagiskRelease(type: Copy) {
-    from 'template_override/module.prop'
-    into zipPathMagiskRelease
-    filter { line ->
-        line.replaceAll('%%%ID%%%', moduleIdMagisk)
-                .replaceAll('%%%NAME%%%', moduleNameMagisk)
-                .replaceAll('%%%VERSION_NAME%%%', versionName)
-                .replaceAll('%%%VERSION_CODE%%%', versionCode.toString())
-                .replaceAll('%%%AUTHOR%%%', moduleAuthor)
-                .replaceAll('%%%DESCRIPTION%%%', moduleDescriptionMagisk)
-    }
-    filter(FixCrLfFilter.class,
-            eol: FixCrLfFilter.CrLf.newInstance("lf"))
-
-    finalizedBy('copyRiruPropMagiskRelease')
-
-    doLast {
-        file("$zipPathMagiskRelease/common").mkdirs()
-        file("$zipPathMagiskRelease/system").mkdirs()
-        file("$zipPathMagiskRelease/system_x86").mkdirs()
-
-        file("$zipPathMagiskRelease/post-fs-data.sh").renameTo("$zipPathMagiskRelease/common/post-fs-data.sh")
-
-        file("$libPathRelease/arm64-v8a").renameTo("$zipPathMagiskRelease/system/lib64")
-        file("$libPathRelease/armeabi-v7a").renameTo("$zipPathMagiskRelease/system/lib")
-        file("$libPathRelease/x86_64").renameTo("$zipPathMagiskRelease/system_x86/lib64")
-        file("$libPathRelease/x86").renameTo("$zipPathMagiskRelease/system_x86/lib")
-
-        def path = "$zipPathMagiskRelease/data/misc/riru/modules/$moduleId"
-        file("$path/packages").mkdirs()
-
-        file("$path/gsm.sim.operator.numeric").createNewFile()
-        file("$path/gsm.sim.operator.numeric").text = "310030"
-        file("$path/gsm.sim.operator.iso-country").createNewFile()
-        file("$path/gsm.sim.operator.iso-country").text = "us"
-        file("$path/packages/com.google.android.gms").createNewFile()
-        file("$path/packages/com.google.android.gsf").createNewFile()
-        file("$path/packages/com.google.android.apps.maps").createNewFile()
+allprojects {
+    repositories {
+        google()
+        jcenter()
     }
 }
 
-
-task copyRiruPropMagiskRelease(type: Copy) {
-    from 'template_override/riru_module.prop'
-    into "$zipPathMagiskRelease/data/misc/riru/modules/$moduleId"
-    filter { line ->
-        line.replaceAll('%%%NAME%%%', moduleName)
-                .replaceAll('%%%AUTHOR%%%', moduleAuthor)
-                .replaceAll('%%%VERSION_NAME%%%', versionName)
-                .replaceAll('%%%VERSION_CODE%%%', versionCode.toString())
-                .replaceAll('%%%DESCRIPTION%%%', moduleDescription)
-                .replaceAll('%%%API%%%', riruApi.toString())
-    }
-    filter(FixCrLfFilter.class,
-            eol: FixCrLfFilter.CrLf.newInstance("lf"))
-
-    doLast {
-        file("$zipPathMagiskRelease/riru_module.prop").delete()
-        file("$zipPathMagiskRelease/data/misc/riru/modules/$moduleId/riru_module.prop").renameTo("$zipPathMagiskRelease/data/misc/riru/modules/$moduleId/module.prop")
-    }
+task clean(type: Delete) {
+    delete rootProject.buildDir
 }
 
-task buildNativeRelease(type: Exec) {
-    if (isWindows)
-        commandLine 'cmd', '/c', 'ndk-build.cmd',
-                '-j8',
-                "NDK_LIBS_OUT=$libPathRelease",
-                "NDK_OUT=$buildDir/ndkBuild/release/obj".replace("\\", "/")
-    else
-        commandLine 'sh', 'ndk-build',
-                '-j8',
-                "NDK_LIBS_OUT=$libPathRelease",
-                "NDK_OUT=$buildDir/ndkBuild/release/obj"
-}
-
-task createMagiskTmpDirRelease(type: Copy) {
-    from "$rootDir/template/magisk", 'template_override'
-    into zipPathMagiskRelease
-}
-
-task zipMagiskRelease(type: Zip) {
-    archiveFileName = zipNameMagisk
-    destinationDirectory = file("$rootDir/release")
-
-    from "$zipPathMagiskRelease"
-}
-
-task cleanMagiskRelease(type: Delete) {
-    delete file(zipPathMagiskRelease)
-    delete file("$rootDir/release/$zipNameMagisk")
-}
-
-task assembleMagiskRelease(type: GradleBuild) {
-    tasks = [
-            'buildNativeRelease',
-            'cleanMagiskRelease',
-            'createMagiskTmpDirRelease',
-            'copyFilesMagiskRelease',
-            'zipMagiskRelease'
-    ]
+ext {
+    minSdkVersion = 24
+    targetSdkVersion = 30
+    ndkVersion = "21.3.6528147"
 }

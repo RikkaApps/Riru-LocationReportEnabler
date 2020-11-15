@@ -1,0 +1,26 @@
+ext {
+    moduleId = "location_report_enabler"
+    moduleVersion = "v10.0"
+    moduleVersionCode = 13
+    moduleMinRiruApiVersion = 9
+    moduleMinRiruVersionName = "v22.0"
+    moduleMaxRiruApiVersion = 9
+
+    moduleProp = [
+            name       : "Location Report Enabler",
+            version    : moduleVersion,
+            versionCode: moduleVersionCode.toString(),
+            author     : "Rikka",
+            description: "Enable Google location report by hooking system_property_get.",
+            minApi     : moduleMinRiruApiVersion
+    ]
+
+    magiskModuleProp = [
+            id         : "riru_$moduleId",
+            name       : "Riru - ${moduleProp['name']}",
+            version    : moduleProp['version'],
+            versionCode: moduleProp['versionCode'],
+            author     : moduleProp['author'],
+            description: moduleProp['description']
+    ]
+}
