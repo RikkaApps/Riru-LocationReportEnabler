@@ -1,10 +1,10 @@
 # Riru - Location Report Enabler
 
-A module of [Riru](https://github.com/RikkaApps/Riru). Enable Google location report and Google app timeline by hook `__system_property_get` in specific packages.
+A module of [Riru](https://github.com/RikkaApps/Riru). Enable Google Feed & Timeline & Location reprot in unsupported regions by changing system properties in related packages.
 
 ## What does this module do
 
-By default, `__system_property_get` (and `__system_property_read_callback` on API 26+) will be hooked in these packages
+By default, `__system_property_get` and `__system_property_read_callback` (API 26+) will be hooked in these packages
 
 * com.google.android.gsf
 * com.google.android.gms

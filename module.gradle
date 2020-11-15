@@ -1,5 +1,8 @@
 ext {
     moduleId = "location_report_enabler"
+    moduleName = "Location Report Enabler"
+    moduleAuthor = "Rikka"
+    moduleDescription = "Enable Google Feed & Timeline & Location reprot in unsupported regions by changing system properties in related packages."
     moduleVersion = "v10.0"
     moduleVersionCode = 13
     moduleMinRiruApiVersion = 9
@@ -7,11 +10,11 @@ ext {
     moduleMaxRiruApiVersion = 9
 
     moduleProp = [
-            name       : "Location Report Enabler",
+            name       : moduleName,
             version    : moduleVersion,
             versionCode: moduleVersionCode.toString(),
-            author     : "Rikka",
-            description: "Enable Google location report by hooking system_property_get.",
+            author     : moduleAuthor,
+            description: moduleDescription,
             minApi     : moduleMinRiruApiVersion
     ]
 
