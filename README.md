@@ -17,6 +17,8 @@ and the return value will be changed
 
 ## Configuration
 
+Note, reboot (or kill zygote) is required to let the new settings take effect.
+
 ### Packages
 
 `/data/adb/riru/modules/location_report_enabler/packages/<package name>`
