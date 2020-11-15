@@ -15,20 +15,12 @@ and the return value will be changed
 * `gsm.sim.operator.numeric` -> `310030`
 * `gsm.sim.operator.iso-country` -> `us`
 
-## Customize
+## Configuration
 
-* Add / remove enabled package
+### Packages
 
-  ```
-  touch /data/misc/riru/modules/location_report_enabler/packages/<package name>
-  rm /data/misc/riru/modules/location_report_enabler/packages/<package name>
-  ```
+`/data/adb/riru/modules/location_report_enabler/packages/<package name>`
 
-* Return value
+### Properties
 
-  ```
-  echo -n 310030 > /data/misc/riru/modules/location_report_enabler/gsm.sim.operator.numeric
-  echo -n us > /data/misc/riru/modules/location_report_enabler/gsm.sim.operator.iso-country
-  ```
-
-  **Don't forget `-n`, or the return data will contain a newline**
+`/data/misc/riru/modules/location_report_enabler/properties/<key>` (file content is value)

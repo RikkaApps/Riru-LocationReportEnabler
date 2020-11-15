@@ -55,3 +55,23 @@ ui_print "- Extracting extra files"
 rm -f "$RIRU_MODULE_PATH/module.prop.new"
 extract "$ZIPFILE" 'riru/module.prop.new' "$RIRU_MODULE_PATH" true
 set_perm "$RIRU_MODULE_PATH/module.prop.new" 0 0 0600 $RIRU_SECONTEXT
+
+# Create default config if necessary
+CONFIG_PATH="$RIRU_MODULE_PATH/config"
+
+if [ ! -d "$CONFIG_PATH/properties" ]; then
+    ui_print "- Creating default configuration (1)"
+    mkdir -p "$CONFIG_PATH/properties"
+    echo -n "310030" > "$CONFIG_PATH/properties/gsm.sim.operator.numeric"
+    echo -n "us" > "$CONFIG_PATH/properties/gsm.sim.operator.iso-country"
+fi
+
+if [ ! -d "$CONFIG_PATH/packages" ]; then
+    ui_print "- Creating default configuration (2)"
+    mkdir -p "$CONFIG_PATH/packages"
+    touch "$CONFIG_PATH/packages/com.google.android.gsf"
+    touch "$CONFIG_PATH/packages/com.google.android.gms"
+    touch "$CONFIG_PATH/packages/com.google.android.apps.maps"
+fi
+
+set_perm $CONFIG_PATH 0 0 0600 $RIRU_SECONTEXT

@@ -1,14 +1,14 @@
+#include <cstdio>
+#include <cstdlib>
 #include <jni.h>
-#include <sys/types.h>
 #include <riru.h>
-#include <malloc.h>
-#include <cstring>
 #include <nativehelper/scoped_utf_chars.h>
 #include <sys/system_properties.h>
 
 #include "logging.h"
 #include "hook.h"
 #include "android.h"
+#include "config.h"
 
 static char saved_package_name[256] = {0};
 static int saved_uid;
@@ -59,11 +59,9 @@ static void appProcessPost(
 
     LOGD("%s: uid=%d, package=%s, process=%s", from, uid, package_name, saved_process_name);
 
-    if (strcmp("com.google.android.gsf", package_name) == 0
-        || strcmp("com.google.android.gms", package_name) == 0
-        || strcmp("com.google.android.apps.maps", package_name) == 0) {
+    if (Config::Packages::Find(package_name)) {
         LOGI("install hook for %d:%s", uid / 100000, package_name);
-        install_hook();
+        Hook::install();
     }
 }
 
@@ -99,6 +97,7 @@ static void specializeAppProcessPost(
 }
 
 static void onModuleLoaded() {
+    Config::Load();
 }
 
 extern "C" {
