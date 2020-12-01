@@ -7,6 +7,7 @@
 #include "config.h"
 #include "misc.h"
 #include "logging.h"
+#include "rirud.h"
 
 using namespace Config;
 
@@ -51,21 +52,50 @@ void Packages::Add(const char *name) {
 }
 
 void Config::Load() {
-    foreach_dir(PROPS_PATH, [](int dirfd, struct dirent *entry) {
+    if (!rirud::ForeachDir(PROPS_PATH, [](struct dirent *entry, bool *) {
+        if (entry->d_name[0] == '.') return;
+
+        char path[PATH_MAX];
+        char *buf;
+        size_t size;
+
         auto name = entry->d_name;
-        int fd = openat(dirfd, name, O_RDONLY);
-        if (fd == -1) return;
+        snprintf(path, PATH_MAX, "%s/%s", PROPS_PATH, name);
 
-        char buf[PROP_VALUE_MAX]{0};
-        if (read(fd, buf, PROP_VALUE_MAX) >= 0) {
+        if (rirud::ReadFile(path, buf, size)) {
             Properties::Put(name, buf);
+            if (buf) free(buf);
         }
+    })) {
+        LOGD("read props from rirud failed");
 
-        close(fd);
-    });
+        foreach_dir(PROPS_PATH, [](int dirfd, struct dirent *entry, bool *) {
+            auto name = entry->d_name;
+            int fd = openat(dirfd, name, O_RDONLY);
+            if (fd == -1) return;
 
-    foreach_dir(PACKAGES_PATH, [](int, struct dirent *entry) {
+            char buf[PROP_VALUE_MAX]{0};
+            if (read(fd, buf, PROP_VALUE_MAX) >= 0) {
+                Properties::Put(name, buf);
+            }
+
+            close(fd);
+        });
+    } else {
+        LOGD("read props from rirud");
+    }
+
+    if (!rirud::ForeachDir(PACKAGES_PATH, [](struct dirent *entry, bool *) {
+        if (entry->d_name[0] == '.') return;
         auto name = entry->d_name;
         Packages::Add(name);
-    });
+    })) {
+        LOGD("read packages from rirud failed");
+        foreach_dir(PACKAGES_PATH, [](int, struct dirent *entry, bool *) {
+            auto name = entry->d_name;
+            Packages::Add(name);
+        });
+    } else {
+        LOGD("read packages from rirud");
+    }
 }
