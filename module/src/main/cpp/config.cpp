@@ -52,22 +52,36 @@ void Packages::Add(const char *name) {
 }
 
 void Config::Load() {
-    if (!rirud::ForeachDir(PROPS_PATH, [](struct dirent *entry, bool *) {
-        if (entry->d_name[0] == '.') return;
+    auto rirud_fd = rirud::OpenSocket();
+    if (rirud_fd != -1) {
+        LOGD("try read from rirud");
 
-        char path[PATH_MAX];
-        char *buf;
-        size_t size;
+        std::vector<std::string> prop_dirs, package_dirs;
+        if (rirud::ReadDir(rirud_fd, PROPS_PATH, prop_dirs)
+            && rirud::ReadDir(rirud_fd, PACKAGES_PATH, package_dirs)) {
+            LOGD("read from rirud succeed");
 
-        auto name = entry->d_name;
-        snprintf(path, PATH_MAX, "%s/%s", PROPS_PATH, name);
+            for (const auto &name : prop_dirs) {
+                char path[PATH_MAX];
+                char *buf;
+                size_t size;
 
-        if (rirud::ReadFile(path, buf, size)) {
-            Properties::Put(name, buf);
-            if (buf) free(buf);
+                snprintf(path, PATH_MAX, "%s/%s", PROPS_PATH, name.c_str());
+
+                if (rirud::ReadFile(rirud_fd, path, buf, size)) {
+                    Properties::Put(name.c_str(), buf);
+                    if (buf) free(buf);
+                }
+            }
+
+            for (const auto &name : package_dirs) {
+                Packages::Add(name.c_str());
+            }
         }
-    })) {
-        LOGD("read props from rirud failed");
+
+        close(rirud_fd);
+    } else {
+        LOGD("read from rirud failed");
 
         foreach_dir(PROPS_PATH, [](int dirfd, struct dirent *entry, bool *) {
             auto name = entry->d_name;
@@ -81,21 +95,10 @@ void Config::Load() {
 
             close(fd);
         });
-    } else {
-        LOGD("read props from rirud");
-    }
 
-    if (!rirud::ForeachDir(PACKAGES_PATH, [](struct dirent *entry, bool *) {
-        if (entry->d_name[0] == '.') return;
-        auto name = entry->d_name;
-        Packages::Add(name);
-    })) {
-        LOGD("read packages from rirud failed");
         foreach_dir(PACKAGES_PATH, [](int, struct dirent *entry, bool *) {
             auto name = entry->d_name;
             Packages::Add(name);
         });
-    } else {
-        LOGD("read packages from rirud");
     }
 }

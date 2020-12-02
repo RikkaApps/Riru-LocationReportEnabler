@@ -4,6 +4,8 @@
 #include <cinttypes>
 #include <malloc.h>
 #include <dirent.h>
+#include <string>
+#include <vector>
 #include "riru.h"
 #include "rirud.h"
 #include "logging.h"
@@ -15,32 +17,38 @@
 static const uint32_t ACTION_READ_FILE = 4;
 static const uint32_t ACTION_READ_DIR = 5;
 
-bool rirud::ReadFile(const char *path, char *&bytes, size_t &bytes_size) {
-    if (riru_api_version < 10) return false;
+int rirud::OpenSocket() {
+    if (riru_api_version < 10) return -1;
 
-    struct sockaddr_un addr{};
-    uint32_t path_size = strlen(path);
-    int32_t reply;
-    int32_t file_size;
     int fd;
+    struct sockaddr_un addr{};
     socklen_t socklen;
-    uint32_t buffer_size = 1024 * 8;
-    bool res = false;
-
-    bytes = nullptr;
-    bytes_size = 0;
 
     if ((fd = socket(PF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0)) < 0) {
         PLOGE("socket");
-        goto clean;
+        return -1;
     }
 
     socklen = setup_sockaddr(&addr, SOCKET_ADDRESS);
 
     if (connect(fd, (struct sockaddr *) &addr, socklen) == -1) {
         PLOGE("connect %s", SOCKET_ADDRESS);
-        goto clean;
+        close(fd);
+        return -1;
     }
+
+    return fd;
+}
+
+bool rirud::ReadFile(int fd, const char *path, char *&bytes, size_t &bytes_size) {
+    uint32_t path_size = strlen(path);
+    int32_t reply;
+    int32_t file_size;
+    uint32_t buffer_size = 1024 * 8;
+    bool res = false;
+
+    bytes = nullptr;
+    bytes_size = 0;
 
     if (write_full(fd, &ACTION_READ_FILE, sizeof(uint32_t)) != 0
         || write_full(fd, &path_size, sizeof(uint32_t)) != 0
@@ -106,36 +114,16 @@ bool rirud::ReadFile(const char *path, char *&bytes, size_t &bytes_size) {
         }
     }
 
-
     clean:
-    if (fd != -1) close(fd);
     return res;
 }
 
-bool rirud::ForeachDir(const char *path, void(*callback)(struct dirent *, bool *continue_read)) {
-    if (riru_api_version < 10) return false;
-
-    struct sockaddr_un addr{};
+bool rirud::ReadDir(int fd, const char *path, std::vector<std::string> &dirs) {
     uint32_t path_size = strlen(path);
     int32_t reply;
-    int fd;
-    socklen_t socklen;
     bool res = false;
     bool continue_read = true;
-
     dirent dirent{};
-
-    if ((fd = socket(PF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0)) < 0) {
-        PLOGE("socket");
-        goto clean;
-    }
-
-    socklen = setup_sockaddr(&addr, SOCKET_ADDRESS);
-
-    if (connect(fd, (struct sockaddr *) &addr, socklen) == -1) {
-        PLOGE("connect %s", SOCKET_ADDRESS);
-        goto clean;
-    }
 
     if (write_full(fd, &ACTION_READ_DIR, sizeof(uint32_t)) != 0
         || write_full(fd, &path_size, sizeof(uint32_t)) != 0
@@ -167,6 +155,7 @@ bool rirud::ForeachDir(const char *path, void(*callback)(struct dirent *, bool *
         }
 
         if (reply == -1) {
+            res = true;
             goto clean;
         }
 
@@ -181,10 +170,11 @@ bool rirud::ForeachDir(const char *path, void(*callback)(struct dirent *, bool *
             goto clean;
         }
 
-        callback(&dirent, &continue_read);
+        if (dirent.d_name[0] != '.') {
+            dirs.emplace_back(dirent.d_name);
+        }
     }
 
     clean:
-    if (fd != -1) close(fd);
     return res;
 }

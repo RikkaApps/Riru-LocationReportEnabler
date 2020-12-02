@@ -2,6 +2,7 @@
 
 namespace rirud {
 
-    bool ReadFile(const char *path, char *&bytes, size_t &bytes_size);
-    bool ForeachDir(const char *path, void(*callback)(struct dirent *, bool *continue_read));
+    bool ReadFile(int fd, const char *path, char *&bytes, size_t &bytes_size);
+    bool ReadDir(int fd, const char *path, std::vector<std::string> &dirs);
+    int OpenSocket();
 }
