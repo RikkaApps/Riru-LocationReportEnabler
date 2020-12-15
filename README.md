@@ -21,8 +21,8 @@ Note, reboot (or kill zygote) is required to let the new settings take effect.
 
 ### Packages
 
-`/data/adb/riru/modules/location_report_enabler/packages/<package name>`
+`/data/adb/riru/modules/location_report_enabler/config/packages/<package name>`
 
 ### Properties
 
-`/data/misc/riru/modules/location_report_enabler/properties/<key>` (file content is value)
+`/data/adb/riru/modules/location_report_enabler/config/properties/<key>` (file content is value)
