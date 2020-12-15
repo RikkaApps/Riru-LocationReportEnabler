@@ -40,15 +40,15 @@ int rirud::OpenSocket() {
     return fd;
 }
 
-bool rirud::ReadFile(int fd, const char *path, char *&bytes, size_t &bytes_size) {
+bool rirud::ReadFile(int fd, const char *path, std::string **content) {
     uint32_t path_size = strlen(path);
     int32_t reply;
     int32_t file_size;
     uint32_t buffer_size = 1024 * 8;
     bool res = false;
 
-    bytes = nullptr;
-    bytes_size = 0;
+    char *bytes = nullptr;
+    ssize_t bytes_size = 0;
 
     if (write_full(fd, &ACTION_READ_FILE, sizeof(uint32_t)) != 0
         || write_full(fd, &path_size, sizeof(uint32_t)) != 0
@@ -90,6 +90,7 @@ bool rirud::ReadFile(int fd, const char *path, char *&bytes, size_t &bytes_size)
             LOGD("read %d bytes (total %d)", (int) read_size, (int) bytes_size);
         }
         res = true;
+        *content = new std::string(bytes, bytes_size);
     } else if (file_size == 0) {
         while (true) {
             if (bytes == nullptr) {
@@ -106,6 +107,7 @@ bool rirud::ReadFile(int fd, const char *path, char *&bytes, size_t &bytes_size)
             }
             if (read_size == 0) {
                 res = true;
+                *content = new std::string(bytes, bytes_size);
                 goto clean;
             }
 

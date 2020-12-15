@@ -17,14 +17,10 @@ namespace Config {
     namespace Properties {
 
         Property *Find(const char *name);
-
-        void Put(const char *name, const char *value);
     }
 
     namespace Packages {
 
         bool Find(const char *name);
-
-        void Add(const char *name);
     }
 }

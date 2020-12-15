@@ -11,6 +11,20 @@
 
 using namespace Config;
 
+namespace Config {
+
+    namespace Properties {
+
+        void Put(const char *name, const char *value);
+    }
+
+    namespace Packages {
+
+        void Add(const char *name);
+    }
+}
+
+
 #define CONFIG_PATH "/data/adb/riru/modules/" RIRU_MODULE_ID "/config"
 #define PROPS_PATH CONFIG_PATH "/properties"
 #define PACKAGES_PATH CONFIG_PATH "/packages"
@@ -63,14 +77,12 @@ void Config::Load() {
 
             for (const auto &name : prop_dirs) {
                 char path[PATH_MAX];
-                char *buf;
-                size_t size;
+                std::string *content;
 
                 snprintf(path, PATH_MAX, "%s/%s", PROPS_PATH, name.c_str());
 
-                if (rirud::ReadFile(rirud_fd, path, buf, size)) {
-                    Properties::Put(name.c_str(), buf);
-                    if (buf) free(buf);
+                if (rirud::ReadFile(rirud_fd, path, &content)) {
+                    Properties::Put(name.c_str(), (*content).c_str());
                 }
             }
 
