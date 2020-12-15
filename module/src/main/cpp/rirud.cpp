@@ -91,7 +91,7 @@ bool rirud::ReadFile(int fd, const char *path, std::string **content) {
         }
         res = true;
         *content = new std::string(bytes, bytes_size);
-    } else if (file_size == 0) {
+    } else if (file_size == -1) {
         while (true) {
             if (bytes == nullptr) {
                 bytes = (char *) malloc(buffer_size);
@@ -114,6 +114,10 @@ bool rirud::ReadFile(int fd, const char *path, std::string **content) {
             bytes_size += read_size;
             LOGD("read %d bytes (total %d)", (int) read_size, (int) bytes_size);
         }
+    } else if (file_size == 0) {
+        res = true;
+        *content = new std::string();
+        goto clean;
     }
 
     clean:
