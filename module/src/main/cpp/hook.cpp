@@ -24,6 +24,7 @@ NEW_FUNC_DEF(int, __system_property_get, const char *key, char *value) {
     if (prop) {
         LOGI("system_property_get: %s=%s -> %s", key, value, prop->value.c_str());
         strcpy(value, prop->value.c_str());
+        res = (int)prop->value.length();
     }
     return res;
 }
