@@ -4,6 +4,10 @@
 
 ## Changelog
 
+### v10.2 (15) (2021-01-07)
+
+- Fix the return value of `__system_property_get` ([#33](https://github.com/RikkaApps/Riru-LocationReportEnabler/pull/33))
+
 ### v10.0 (13) (2020-11-15)
 
 - Works on Android 11
