@@ -3,8 +3,8 @@ ext {
     moduleName = "Location Report Enabler"
     moduleAuthor = "Rikka"
     moduleDescription = "Enable Google Feed & Timeline & Location reprot in unsupported regions by changing system properties in related packages."
-    moduleVersion = "v10.1"
-    moduleVersionCode = 14
+    moduleVersion = "v10.2"
+    moduleVersionCode = 15
     moduleMinRiruApiVersion = 9
     moduleMinRiruVersionName = "v23.0"
     moduleMaxRiruApiVersion = 10
