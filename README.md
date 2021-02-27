@@ -1,6 +1,6 @@
 # Riru - Location Report Enabler
 
-A module of [Riru](https://github.com/RikkaApps/Riru). Enable Google Feed & Timeline & Location reprot in unsupported regions by changing system properties in related packages.
+A module of [Riru](https://github.com/RikkaApps/Riru). Enable Google Feed & Timeline & Location report in unsupported regions by changing system properties in related packages.
 
 ## What does this module do
 
