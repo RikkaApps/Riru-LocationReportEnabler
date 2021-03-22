@@ -1,4 +1,4 @@
-# Riru - Location Report Enabler
+# Location Report Enabler
 
 A module of [Riru](https://github.com/RikkaApps/Riru). Enable Google Feed & Timeline & Location report in unsupported regions by changing system properties in related packages.
 
@@ -21,8 +21,8 @@ Note, reboot (or kill zygote) is required to let the new settings take effect.
 
 ### Packages
 
-`/data/adb/riru/modules/location_report_enabler/config/packages/<package name>`
+`/data/adb/modules/riru_location_report_enabler/config/packages/<package name>`
 
 ### Properties
 
-`/data/adb/riru/modules/location_report_enabler/config/properties/<key>` (file content is value)
+`/data/adb/modules/riru_location_report_enabler/config/properties/<key>` (file content is value)
