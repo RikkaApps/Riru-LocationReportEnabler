@@ -9,7 +9,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         externalNativeBuild {
             cmake {
-                arguments "-DMODULE_NAME:STRING=riru_$moduleId",
+                arguments "-DMODULE_NAME:STRING=$moduleId",
                         "-DRIRU_MODULE_ID=$moduleId",
                         "-DRIRU_MODULE_API_VERSION=$moduleRiruApiVersion",
                         "-DRIRU_MODULE_VERSION=$moduleVersionCode",
@@ -29,23 +29,14 @@ android {
     }
 }
 
-repositories {
-    mavenLocal()
-    jcenter()
-    maven { url 'https://dl.bintray.com/rikkaw/Libraries' }
-}
-
 dependencies {
-    implementation 'rikka.ndk:riru:10'
-    implementation 'rikka.ndk.thirdparty:xhook:1.2.0'
-    implementation 'rikka.ndk.thirdparty:nativehelper:20201111'
+    implementation 'dev.rikka.ndk:riru:25.0.0'
+    implementation 'dev.rikka.ndk.thirdparty:xhook:1.2.0'
+    implementation 'dev.rikka.ndk.thirdparty:nativehelper:1.0.0'
 }
 
 def outDir = file("$rootDir/out")
 def magiskDir = file("$outDir/magisk_module")
-def zipName = "${magiskModuleProp['id'].replace('_', '-')}-${magiskModuleProp['version']}.zip"
-def riruDir = "$magiskDir/riru"
-
 
 import org.apache.tools.ant.filters.FixCrLfFilter
 
@@ -60,15 +51,23 @@ static def calcSha256(file) {
     return md.digest().encodeHex()
 }
 
-static def renameOrFail(File from, File to) {
-    if (!from.renameTo(to)) {
-        throw new IOException("Unable reanme file $from to $to")
-    }
-}
-
 android.libraryVariants.all { variant ->
-    def task = variant.assembleProvider.get()
-    task.doLast {
+    def variantCapped = variant.name.capitalize()
+    def variantLowered = variant.name.toLowerCase()
+
+    def zipName = "${moduleId}-${moduleVersion}-${variantLowered}.zip"
+
+    def is_windows = org.gradle.internal.os.OperatingSystem.current().isWindows()
+
+    task("zip${variantCapped}", type: Zip) {
+        dependsOn("assemble${variantCapped}")
+        from magiskDir
+        archiveName zipName
+        destinationDir outDir
+    }
+
+    variant.outputs.all {
+        def task = variant.assembleProvider.get()
         // clear
         delete { delete magiskDir }
 
@@ -97,28 +96,17 @@ android.libraryVariants.all { variant ->
 
         // generate module.prop
         def modulePropText = ""
-        magiskModuleProp.each { k, v -> modulePropText += "$k=$v\n" }
+        moduleProp.each { k, v -> modulePropText += "$k=$v\n" }
         modulePropText = modulePropText.trim()
         file("$magiskDir/module.prop").text = modulePropText
 
-        // generate module.prop for Riru
-        def riruModulePropText = ""
-        moduleProp.each { k, v -> riruModulePropText += "$k=$v\n" }
-        riruModulePropText = riruModulePropText.trim()
-        file(riruDir).mkdirs()
-
-        // module.prop.new will be renamed to module.prop in post-fs-data.sh
-        file("$riruDir/module.prop.new").text = riruModulePropText
-
         // copy native files
         def nativeOutDir = file("build/intermediates/cmake/$variant.name/obj")
-
-        file("$magiskDir/system").mkdirs()
-        file("$magiskDir/system_x86").mkdirs()
-        renameOrFail(file("$nativeOutDir/arm64-v8a"), file("$magiskDir/system/lib64"))
-        renameOrFail(file("$nativeOutDir/armeabi-v7a"), file("$magiskDir/system/lib"))
-        renameOrFail(file("$nativeOutDir/x86_64"), file("$magiskDir/system_x86/lib64"))
-        renameOrFail(file("$nativeOutDir/x86"), file("$magiskDir/system_x86/lib"))
+        copy {
+            from "$nativeOutDir"
+            into "$magiskDir/lib"
+            exclude "**/*.txt"
+        }
 
         // generate sha1sum
         fileTree("$magiskDir").matching {
@@ -127,12 +115,41 @@ android.libraryVariants.all { variant ->
             if (f.directory) return
             file(f.file.path + ".sha256sum").text = calcSha256(f.file)
         }
-    }
-    task.finalizedBy zipMagiskMoudle
-}
 
-task zipMagiskMoudle(type: Zip) {
-    from magiskDir
-    archiveName zipName
-    destinationDir outDir
+        task.finalizedBy("zip${variantCapped}")
+    }
+
+    task("push${variantCapped}", type: Exec) {
+        dependsOn("assemble${variantCapped}")
+        workingDir outDir
+        def commands = [android.adbExecutable, "push",
+                        zipName,
+                        "/data/local/tmp/"]
+        if (is_windows) {
+            commandLine 'cmd', '/c', commands.join(" ")
+        } else {
+            commandLine commands
+        }
+    }
+
+    task("flash${variantCapped}", type: Exec) {
+        dependsOn("push${variantCapped}")
+        def commands = [android.adbExecutable, "shell", "su", "-c",
+                        "magisk --install-module /data/local/tmp/${zipName}"]
+        if (is_windows) {
+            commandLine 'cmd', '/c', commands.join(" ")
+        } else {
+            commandLine commands
+        }
+    }
+
+    task("flashAndReoot${variantCapped}", type: Exec) {
+        dependsOn("flash${variantCapped}")
+        def commands = [android.adbExecutable, "shell", "reboot"]
+        if (is_windows) {
+            commandLine 'cmd', '/c', commands.join(" ")
+        } else {
+            commandLine commands
+        }
+    }
 }

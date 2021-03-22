@@ -1,29 +1,28 @@
 ext {
+    gitCommitId = 'git rev-parse --short HEAD'.execute([], project.rootDir).text.trim()
+    gitCommitCount = Integer.parseInt('git rev-list --count HEAD'.execute([], project.rootDir).text.trim())
+
+    moduleMinRiruApiVersion = 25
+    moduleMinRiruVersionName = "v25.0.0"
+    moduleRiruApiVersion = 25
+
     moduleId = "location_report_enabler"
     moduleName = "Location Report Enabler"
     moduleAuthor = "Rikka"
     moduleDescription = "Enable Google Feed & Timeline & Location reprot in unsupported regions by changing system properties in related packages."
-    moduleVersion = "v10.2"
-    moduleVersionCode = 15
-    moduleMinRiruApiVersion = 9
-    moduleMinRiruVersionName = "v23.0"
-    moduleRiruApiVersion = 10
+
+    moduleVersionMajor = 11
+    moduleVersionMinor = 0
+    moduleVersionPatch = 0
+    moduleVersion = "v${moduleVersionMajor}.${moduleVersionMinor}.${moduleVersionPatch}"
+    moduleVersionCode = gitCommitCount
 
     moduleProp = [
-            name       : moduleName,
-            version    : moduleVersion,
-            versionCode: moduleVersionCode.toString(),
-            author     : moduleAuthor,
-            description: moduleDescription,
-            minApi     : moduleMinRiruApiVersion
-    ]
-
-    magiskModuleProp = [
             id         : "riru_$moduleId",
-            name       : "Riru - ${moduleProp['name']}",
-            version    : moduleProp['version'],
-            versionCode: moduleProp['versionCode'],
-            author     : moduleProp['author'],
-            description: moduleProp['description']
+            name       : "Riru - ${moduleName}",
+            version    : "${moduleVersion}.r${gitCommitCount}.${gitCommitId}",
+            versionCode: moduleVersionCode,
+            author     : moduleAuthor,
+            description: moduleDescription
     ]
 }

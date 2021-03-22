@@ -1,77 +1,88 @@
 SKIPUNZIP=1
 
-# extract verify.sh
+# Check architecture
+if [ "$ARCH" != "arm" ] && [ "$ARCH" != "arm64" ] && [ "$ARCH" != "x86" ] && [ "$ARCH" != "x64" ]; then
+  abort "! Unsupported platform: $ARCH"
+else
+  ui_print "- Device platform: $ARCH"
+fi
+
+# Extract verify.sh
 ui_print "- Extracting verify.sh"
 unzip -o "$ZIPFILE" 'verify.sh' -d "$TMPDIR" >&2
 if [ ! -f "$TMPDIR/verify.sh" ]; then
-  ui_print    "*********************************************************"
-  ui_print    "! Unable to extract verify.sh!"
-  ui_print    "! This zip may be corrupted, please try downloading again"
+  ui_print "*********************************************************"
+  ui_print "! Unable to extract verify.sh!"
+  ui_print "! This zip may be corrupted, please try downloading again"
   abort "*********************************************************"
 fi
 . $TMPDIR/verify.sh
 
-# extract riru.sh
+# Extract riru.sh
 extract "$ZIPFILE" 'riru.sh' "$MODPATH"
 . $MODPATH/riru.sh
 
 check_riru_version
-check_architecture
+enforce_install_from_magisk_app
 
-# extract libs
+# Extract libs
 ui_print "- Extracting module files"
 
 extract "$ZIPFILE" 'module.prop' "$MODPATH"
-extract "$ZIPFILE" 'post-fs-data.sh' "$MODPATH"
-extract "$ZIPFILE" 'uninstall.sh' "$MODPATH"
-#extract "$ZIPFILE" 'sepolicy.rule' "$MODPATH"
+
+mkdir "$MODPATH/riru"
+mkdir "$MODPATH/riru/lib"
+mkdir "$MODPATH/riru/lib64"
 
 if [ "$ARCH" = "x86" ] || [ "$ARCH" = "x64" ]; then
   ui_print "- Extracting x86 libraries"
-  extract "$ZIPFILE" "system_x86/lib/libriru_$RIRU_MODULE_ID.so" "$MODPATH"
-  mv "$MODPATH/system_x86/lib" "$MODPATH/system/lib"
+  extract "$ZIPFILE" "lib/x86/lib$RIRU_MODULE_ID.so" "$MODPATH/riru/lib" true
 
   if [ "$IS64BIT" = true ]; then
     ui_print "- Extracting x64 libraries"
-    extract "$ZIPFILE" "system_x86/lib64/libriru_$RIRU_MODULE_ID.so" "$MODPATH"
-    mv "$MODPATH/system_x86/lib64" "$MODPATH/system/lib64"
+    extract "$ZIPFILE" "lib/x86_64/lib$RIRU_MODULE_ID.so" "$MODPATH/riru/lib64" true
   fi
-else
+fi
+
+if [ "$ARCH" = "arm" ] || [ "$ARCH" = "arm64" ]; then
   ui_print "- Extracting arm libraries"
-  extract "$ZIPFILE" "system/lib/libriru_$RIRU_MODULE_ID.so" "$MODPATH"
+  extract "$ZIPFILE" "lib/armeabi-v7a/lib$RIRU_MODULE_ID.so" "$MODPATH/riru/lib" true
 
   if [ "$IS64BIT" = true ]; then
     ui_print "- Extracting arm64 libraries"
-    extract "$ZIPFILE" "system/lib64/libriru_$RIRU_MODULE_ID.so" "$MODPATH"
+    extract "$ZIPFILE" "lib/arm64-v8a/lib$RIRU_MODULE_ID.so" "$MODPATH/riru/lib64" true
   fi
 fi
 
 set_perm_recursive "$MODPATH" 0 0 0755 0644
 
-# extract Riru files
-ui_print "- Extracting extra files"
-[ -d "$RIRU_MODULE_PATH" ] || mkdir -p "$RIRU_MODULE_PATH" || abort "! Can't create $RIRU_MODULE_PATH"
-
-rm -f "$RIRU_MODULE_PATH/module.prop.new"
-extract "$ZIPFILE" 'riru/module.prop.new' "$RIRU_MODULE_PATH" true
-set_perm "$RIRU_MODULE_PATH/module.prop.new" 0 0 0600 $RIRU_SECONTEXT
-
-# Create default config if necessary
-CONFIG_PATH="$RIRU_MODULE_PATH/config"
-
-if [ ! -d "$CONFIG_PATH/properties" ]; then
-    ui_print "- Creating default configuration (1)"
-    mkdir -p "$CONFIG_PATH/properties"
-    echo -n "310030" > "$CONFIG_PATH/properties/gsm.sim.operator.numeric"
-    echo -n "us" > "$CONFIG_PATH/properties/gsm.sim.operator.iso-country"
+if [ "$MAGISK_VER_CODE" -ge 21000 ]; then
+  CURRENT_MODPATH=$(magisk --path)/.magisk/modules/riru_location_report_enabler
+else
+  CURRENT_MODPATH=/sbin/.magisk/modules/riru_location_report_enabler
 fi
 
-if [ ! -d "$CONFIG_PATH/packages" ]; then
-    ui_print "- Creating default configuration (2)"
-    mkdir -p "$CONFIG_PATH/packages"
-    touch "$CONFIG_PATH/packages/com.google.android.gsf"
-    touch "$CONFIG_PATH/packages/com.google.android.gms"
-    touch "$CONFIG_PATH/packages/com.google.android.apps.maps"
+if [ -d "$CURRENT_MODPATH/config" ]; then
+  ui_print "- Use existing configuration"
+  cp -r "$CURRENT_MODPATH/config" "$MODPATH"/config
 fi
 
-set_perm $CONFIG_PATH 0 0 0600 $RIRU_SECONTEXT
+if [ ! -d "$MODPATH"/config ] && [ -d "/data/adb/riru/modules/location_report_enabler/config" ]; then
+  ui_print "- Use configuration from old versions"
+  cp -r "/data/adb/riru/modules/location_report_enabler/config" "$MODPATH"/config
+fi
+
+if [ ! -d "$MODPATH"/config ]; then
+  ui_print "- Creating default configuration"
+
+  mkdir -p "$MODPATH/config/properties"
+  echo -n "310030" >"$MODPATH/config/properties/gsm.sim.operator.numeric"
+  echo -n "us" >"$MODPATH/config/properties/gsm.sim.operator.iso-country"
+
+  mkdir -p "$MODPATH/config/packages"
+  touch "$MODPATH/config/packages/com.google.android.gsf"
+  touch "$MODPATH/config/packages/com.google.android.gms"
+  touch "$MODPATH/config/packages/com.google.android.apps.maps"
+fi
+
+set_perm_recursive "$MODPATH/config" 0 0 0700 0600

@@ -4,10 +4,10 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/system_properties.h>
+#include <riru.h>
 #include "config.h"
 #include "misc.h"
 #include "logging.h"
-#include "rirud.h"
 
 using namespace Config;
 
@@ -24,10 +24,6 @@ namespace Config {
     }
 }
 
-
-#define CONFIG_PATH "/data/adb/riru/modules/" RIRU_MODULE_ID "/config"
-#define PROPS_PATH CONFIG_PATH "/properties"
-#define PACKAGES_PATH CONFIG_PATH "/packages"
 
 static std::map<std::string, Property *> props;
 static std::vector<std::string> packages;
@@ -66,51 +62,25 @@ void Packages::Add(const char *name) {
 }
 
 void Config::Load() {
-    auto rirud_fd = rirud::OpenSocket();
-    if (rirud_fd != -1) {
-        LOGD("try read from rirud");
+    char buf[PATH_MAX];
 
-        std::vector<std::string> prop_dirs, package_dirs;
-        if (rirud::ReadDir(rirud_fd, PROPS_PATH, prop_dirs)
-            && rirud::ReadDir(rirud_fd, PACKAGES_PATH, package_dirs)) {
-            LOGD("read from rirud succeed");
+    snprintf(buf, PATH_MAX, "%s/config/properties", riru_get_magisk_module_path());
+    foreach_dir(buf, [](int dirfd, struct dirent *entry, bool *) {
+        auto name = entry->d_name;
+        int fd = openat(dirfd, name, O_RDONLY);
+        if (fd == -1) return;
 
-            for (const auto &name : prop_dirs) {
-                char path[PATH_MAX];
-                std::string *content;
-
-                snprintf(path, PATH_MAX, "%s/%s", PROPS_PATH, name.c_str());
-
-                if (rirud::ReadFile(rirud_fd, path, &content)) {
-                    Properties::Put(name.c_str(), (*content).c_str());
-                }
-            }
-
-            for (const auto &name : package_dirs) {
-                Packages::Add(name.c_str());
-            }
+        char buf[PROP_VALUE_MAX]{0};
+        if (read(fd, buf, PROP_VALUE_MAX) >= 0) {
+            Properties::Put(name, buf);
         }
 
-        close(rirud_fd);
-    } else {
-        LOGD("read from rirud failed");
+        close(fd);
+    });
 
-        foreach_dir(PROPS_PATH, [](int dirfd, struct dirent *entry, bool *) {
-            auto name = entry->d_name;
-            int fd = openat(dirfd, name, O_RDONLY);
-            if (fd == -1) return;
-
-            char buf[PROP_VALUE_MAX]{0};
-            if (read(fd, buf, PROP_VALUE_MAX) >= 0) {
-                Properties::Put(name, buf);
-            }
-
-            close(fd);
-        });
-
-        foreach_dir(PACKAGES_PATH, [](int, struct dirent *entry, bool *) {
-            auto name = entry->d_name;
-            Packages::Add(name);
-        });
-    }
+    snprintf(buf, PATH_MAX, "%s/config/packages", riru_get_magisk_module_path());
+    foreach_dir(buf, [](int, struct dirent *entry, bool *) {
+        auto name = entry->d_name;
+        Packages::Add(name);
+    });
 }
