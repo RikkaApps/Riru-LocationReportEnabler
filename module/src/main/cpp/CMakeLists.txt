@@ -37,4 +37,8 @@ find_package(xhook REQUIRED CONFIG)
 
 add_library(${MODULE_NAME} SHARED main.cpp hook.cpp android.cpp misc.cpp config.cpp tinynew.cpp)
 target_link_libraries(${MODULE_NAME} log riru::riru nativehelper::nativehelper_header_only xhook::xhook)
-set_target_properties(${MODULE_NAME} PROPERTIES LINK_FLAGS_RELEASE -s)
+
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+    add_custom_command(TARGET ${MODULE_NAME} POST_BUILD
+            COMMAND ${CMAKE_STRIP} --strip-all --remove-section=.comment "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/lib${MODULE_NAME}.so")
+endif ()

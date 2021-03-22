@@ -1,4 +1,7 @@
-apply plugin: 'com.android.library'
+plugins {
+    id 'com.android.application'
+}
+
 apply from: file(rootProject.file('module.gradle'))
 
 android {
@@ -51,7 +54,7 @@ static def calcSha256(file) {
     return md.digest().encodeHex()
 }
 
-android.libraryVariants.all { variant ->
+android.applicationVariants.all { variant ->
     def variantCapped = variant.name.capitalize()
     def variantLowered = variant.name.toLowerCase()
 
