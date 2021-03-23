@@ -9,7 +9,7 @@ ext {
     moduleId = "location_report_enabler"
     moduleName = "Location Report Enabler"
     moduleAuthor = "Rikka"
-    moduleDescription = "Enable Google Feed & Timeline & Location reprot in unsupported regions by changing system properties in related packages."
+    moduleDescription = "Enable Google Feed & Timeline & Location report in unsupported regions by changing system properties in related packages."
 
     moduleVersionMajor = 11
     moduleVersionMinor = 0
